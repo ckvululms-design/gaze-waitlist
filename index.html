@@ -194,7 +194,7 @@
                         可候補時段與醫師 (多選)
                     </h3>
                     <div class="mb-6 ml-2">
-                        <p class="text-lg text-stone-600 font-medium leading-relaxed italic">請勾選您 <strong class="text-orange-600">能隨時前來</strong> 的時段。若有空檔，櫃檯將去電通知。</p>
+                        <p class="text-lg text-stone-600 font-medium leading-relaxed italic">請勾選您 <strong class="text-orange-600">能隨時前來</strong> 的時段。若有臨時取消，櫃檯將去電通知。</p>
                         <div id="dynamic-schedule-note" class="mt-4 text-sm text-teal-800 bg-teal-50 border border-teal-200 p-4 rounded-xl whitespace-pre-line hidden"></div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10" id="scheduleSlotsContainer"></div>
@@ -474,7 +474,7 @@
             const container = document.getElementById('reasonsContainer');
             reasons.forEach(r => {
                 const div = document.createElement('div');
-                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="visitReason" value="${r}" onchange="checkReasonWarnings()" class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-sm font-bold text-stone-700">${r}</span></label>`;
+                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="visitReason" value="${r}" onchange="checkReasonWarnings()" class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-lg font-bold text-stone-700">${r}</span></label>`;
                 container.appendChild(div);
             });
         };
