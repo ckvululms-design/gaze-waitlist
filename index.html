@@ -19,6 +19,11 @@
         .loading-overlay { display: none; }
         .is-loading .loading-overlay { display: flex; }
         .is-loading .content-wrapper { opacity: 0.3; pointer-events: none; }
+
+        /* 自訂捲軸 */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-[#FDFCF8] text-stone-800 min-h-screen flex flex-col is-loading" id="app-body">
@@ -41,11 +46,13 @@
 
     <!-- 全域載入中遮罩 -->
     <div class="loading-overlay fixed inset-0 z-40 bg-white/50 backdrop-blur-sm items-center justify-center">
-        <div class="bg-white px-8 py-6 rounded-3xl shadow-xl border border-stone-100 flex flex-col items-center gap-4 font-bold text-orange-600">
+        <div class="bg-white px-8 py-6 rounded-3xl shadow-xl border border-stone-100 flex flex-col items-center gap-4 font-bold text-orange-600 max-w-sm w-full mx-4">
             <svg class="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             <div class="text-center">
                 <p id="loading-text" class="text-lg">正在連線至雲端資料庫...</p>
-                <p id="retry-hint" class="text-xs text-stone-400 mt-2 font-normal hidden">系統正在嘗試重連，請稍候 5-10 秒...</p>
+                <p id="retry-hint" class="text-xs text-stone-400 mt-2 font-normal hidden leading-relaxed">
+                    若持續顯示此畫面，可能是 Google 伺服器權限同步中，請稍候 3-5 分鐘後重新整理。
+                </p>
             </div>
         </div>
     </div>
@@ -78,9 +85,7 @@
                                 <th class="p-4 font-bold border-b border-stone-100 text-center">操作</th>
                             </tr>
                         </thead>
-                        <tbody id="visitor-tbody" class="divide-y divide-stone-50">
-                            <!-- 動態載入資料 -->
-                        </tbody>
+                        <tbody id="visitor-tbody" class="divide-y divide-stone-50"></tbody>
                     </table>
                 </div>
                 <div id="visitor-empty" class="text-center py-16 text-stone-400 font-medium hidden">
@@ -105,88 +110,73 @@
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">家屬姓名與稱呼 <span class="text-orange-500">*</span></label>
                             <div class="flex gap-2">
-                                <input type="text" id="ownerName" required class="w-2/3 p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-800" placeholder="例：陳大明">
-                                <select id="ownerTitle" required class="w-1/3 p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-700 cursor-pointer">
-                                    <option value="先生">先生</option>
-                                    <option value="小姐">小姐</option>
-                                    <option value="女士">女士</option>
-                                    <option value="爸爸">爸爸</option>
-                                    <option value="媽媽">媽媽</option>
-                                    <option value="哥哥">哥哥</option>
-                                    <option value="姊姊">姊姊</option>
-                                    <option value="阿公">阿公</option>
-                                    <option value="阿嬤">阿嬤</option>
+                                <input type="text" id="ownerName" required class="w-2/3 p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800" placeholder="例：陳大明">
+                                <select id="ownerTitle" required class="w-1/3 p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-700">
+                                    <option value="先生">先生</option><option value="小姐">小姐</option><option value="女士">女士</option>
+                                    <option value="爸爸">爸爸</option><option value="媽媽">媽媽</option><option value="哥哥">哥哥</option>
+                                    <option value="姊姊">姊姊</option><option value="阿公">阿公</option><option value="阿嬤">阿嬤</option>
                                 </select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">聯絡電話 <span class="text-orange-500">*</span></label>
-                            <input type="tel" id="phone" required pattern="[0-9]{8,15}" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-800" placeholder="例：0912345678">
+                            <input type="tel" id="phone" required pattern="[0-9]{8,15}" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800" placeholder="例：0912345678">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">動物名 <span class="text-orange-500">*</span></label>
-                            <input type="text" id="petName" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-800">
+                            <input type="text" id="petName" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">物種 <span class="text-orange-500">*</span></label>
-                            <select id="species" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-700 cursor-pointer">
-                                <option value="">請選擇</option>
-                                <option value="狗">狗</option>
-                                <option value="貓">貓</option>
+                            <select id="species" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-700">
+                                <option value="">請選擇</option><option value="狗">狗</option><option value="貓">貓</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">品種 <span class="text-orange-500">*</span></label>
-                            <select id="breed" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-800 cursor-pointer">
+                            <select id="breed" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800">
                                 <option value="">請先選擇物種</option>
                             </select>
                         </div>
                         <div class="flex gap-2">
                             <div class="w-2/3">
                                 <label class="block text-sm font-bold text-stone-700 mb-2">年齡 <span class="text-orange-500">*</span></label>
-                                <input type="number" id="age" required min="0" step="0.1" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-800">
+                                <input type="number" id="age" required min="0" step="0.1" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800">
                             </div>
                             <div class="w-1/3">
                                 <label class="block text-sm font-bold text-stone-700 mb-2">單位</label>
-                                <select id="ageUnit" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-700 cursor-pointer">
-                                    <option value="歲">歲</option>
-                                    <option value="個月">個月</option>
+                                <select id="ageUnit" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-700">
+                                    <option value="歲">歲</option><option value="個月">個月</option>
                                 </select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">性別 <span class="text-orange-500">*</span></label>
-                            <select id="sex" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-700 cursor-pointer">
-                                <option value="">請選擇</option>
-                                <option value="公">公</option>
-                                <option value="母">母</option>
+                            <select id="sex" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-700">
+                                <option value="">請選擇</option><option value="公">公</option><option value="母">母</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">絕育狀況 <span class="text-orange-500">*</span></label>
-                            <select id="neutered" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-700 cursor-pointer">
-                                <option value="">請選擇</option>
-                                <option value="已結紮">已結紮</option>
-                                <option value="未結紮">未結紮</option>
+                            <select id="neutered" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-700">
+                                <option value="">請選擇</option><option value="已結紮">已結紮</option><option value="未結紮">未結紮</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">體重 (公斤) <span class="text-orange-500">*</span></label>
-                            <input type="number" id="weight" required min="0" step="0.1" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-[#FCFAF8] transition-all font-medium text-stone-800">
+                            <input type="number" id="weight" required min="0" step="0.1" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800">
                         </div>
                     </div>
 
-                    <!-- 可候補時段區 -->
+                    <!-- 候補時段區 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-3 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
                         <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm">2</span>
                         可候補時段與醫師 (多選)
                     </h3>
-                    
                     <div class="mb-5 ml-2">
-                        <p class="text-sm text-stone-500 font-medium leading-relaxed">請勾選您 <strong class="text-orange-600">能隨時前來</strong> 的時段。若有空檔，櫃檯將去電通知。</p>
-                        <div id="dynamic-schedule-note" class="mt-3 text-sm text-teal-800 bg-teal-50 border border-teal-200 p-3 rounded-xl whitespace-pre-line leading-relaxed hidden"></div>
+                        <p class="text-sm text-stone-500 font-medium">請勾選您 <strong class="text-orange-600">能隨時前來</strong> 的時段。若有空檔，櫃檯將去電通知。</p>
+                        <div id="dynamic-schedule-note" class="mt-3 text-sm text-teal-800 bg-teal-50 border border-teal-200 p-3 rounded-xl whitespace-pre-line hidden"></div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-10" id="scheduleSlotsContainer"></div>
 
                     <!-- 看診原因區 -->
@@ -198,11 +188,11 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="reasonsContainer"></div>
                         <div id="coughWarning" class="hidden mt-4 p-4 bg-orange-50 border border-orange-200 rounded-xl flex items-center gap-3 shadow-sm transition-all fade-in">
                             <span class="text-2xl">⚠️</span>
-                            <span class="text-orange-800 font-bold text-sm leading-relaxed tracking-wide">慢性咳嗽建議同時掛號至內科。</span>
+                            <span class="text-orange-800 font-bold text-sm">慢性咳嗽建議同時掛號至內科。</span>
                         </div>
                         <div id="referralWarning" class="hidden mt-4 p-4 bg-teal-50 border border-teal-200 rounded-xl flex items-start gap-3 shadow-sm transition-all fade-in">
                             <span class="text-2xl mt-0.5">🏥</span>
-                            <span class="text-teal-800 font-bold text-sm leading-relaxed tracking-wide">若為他院轉診，可請您的原主治醫師填寫 <a href="https://gazevetcare.com.tw/for-vets/" target="_blank" class="text-orange-600 underline hover:text-orange-700 decoration-orange-300 underline-offset-4">轉診單 (FastPass)</a>，我們將協助優先安排。</span>
+                            <span class="text-teal-800 font-bold text-sm">若為他院轉診，可請您的原主治醫師填寫 <a href="https://gazevetcare.com.tw/for-vets/" target="_blank" class="text-orange-600 underline">轉診單 (FastPass)</a>，我們將協助優先安排。</span>
                         </div>
                     </div>
 
@@ -213,30 +203,14 @@
                     </h3>
                     <div class="mb-10 ml-2">
                         <p class="text-sm text-stone-600 font-bold mb-3">請問您是否已先致電預約過本院較後面的時段？</p>
-                        <div class="flex gap-6 mb-4">
-                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700">
-                                <input type="radio" name="hasFutureAppt" value="yes" onchange="toggleFutureApptFields()" class="w-5 h-5 text-orange-500 focus:ring-orange-500 border-stone-300"> 是，已有預約
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700">
-                                <input type="radio" name="hasFutureAppt" value="no" checked onchange="toggleFutureApptFields()" class="w-5 h-5 text-orange-500 focus:ring-orange-500 border-stone-300"> 否，尚未預約
-                            </label>
+                        <div class="flex gap-6">
+                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700"><input type="radio" name="hasFutureAppt" value="yes" onchange="toggleFutureApptFields()" class="w-5 h-5 text-orange-500"> 是，已有預約</label>
+                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700"><input type="radio" name="hasFutureAppt" value="no" checked onchange="toggleFutureApptFields()" class="w-5 h-5 text-orange-500"> 否，尚未預約</label>
                         </div>
                         <div id="futureApptFields" class="hidden bg-stone-50 border border-stone-200 p-5 rounded-2xl mt-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-bold text-stone-700 mb-2">原預約日期</label>
-                                    <input type="date" id="futureApptDate" class="w-full p-3 border border-stone-300 rounded-xl focus:ring-4 focus:ring-amber-100 outline-none bg-white font-medium text-stone-800">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-bold text-stone-700 mb-2">原預約醫師</label>
-                                    <select id="futureApptDoctor" class="w-full p-3 border border-stone-300 rounded-xl focus:ring-4 focus:ring-amber-100 outline-none bg-white font-medium text-stone-700 cursor-pointer">
-                                        <option value="">請選擇</option>
-                                        <option value="詹益萍">詹益萍 醫師</option>
-                                        <option value="薛彤">薛彤 醫師</option>
-                                        <option value="楊崇君">楊崇君 醫師</option>
-                                        <option value="不確定/忘記了">不確定/忘記了</option>
-                                    </select>
-                                </div>
+                                <div><label class="block text-sm font-bold text-stone-700 mb-2">原預約日期</label><input type="date" id="futureApptDate" class="w-full p-3 border rounded-xl outline-none"></div>
+                                <div><label class="block text-sm font-bold text-stone-700 mb-2">原預約醫師</label><select id="futureApptDoctor" class="w-full p-3 border rounded-xl outline-none"><option value="">請選擇</option><option value="詹益萍">詹益萍 醫師</option><option value="薛彤">薛彤 醫師</option><option value="楊崇君">楊崇君 醫師</option><option value="不確定">不確定/忘記了</option></select></div>
                             </div>
                         </div>
                     </div>
@@ -246,24 +220,12 @@
                         設定取消候補密碼
                     </h3>
                     <div class="mb-10 w-full md:w-1/2 ml-2">
-                        <input type="text" id="cancelPassword" required class="w-full p-4 border-2 border-amber-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-white font-mono text-lg transition-all shadow-sm" placeholder="請輸入自訂取消密碼">
-                    </div>
-
-                    <!-- 注意事項與按鈕 -->
-                    <div class="space-y-6 mb-10">
-                        <div class="bg-[#FFFDF5] border border-amber-200 rounded-3xl p-6 shadow-sm">
-                            <h4 class="text-lg font-bold text-amber-800 mb-3 flex items-center gap-2">💡 候補機制提醒</h4>
-                            <p class="text-stone-700 leading-loose font-medium">本系統無法保證釋出名額與等候時間。若已在他院就診，請務必取消候補。</p>
-                        </div>
-                        <div class="bg-[#F2FAFA] border border-teal-200 rounded-3xl p-6 shadow-sm">
-                            <h4 class="text-lg font-bold text-teal-800 mb-3 flex items-center gap-2">💙 零恐懼醫療 (Fear Free)</h4>
-                            <p class="text-stone-700 leading-loose font-medium">若毛孩容易緊張，強烈建議向家庭醫師諮詢就診前安神藥物 (PVPs)。</p>
-                        </div>
+                        <input type="text" id="cancelPassword" required class="w-full p-4 border-2 border-amber-200 rounded-xl focus:border-amber-400 outline-none bg-white font-mono text-lg shadow-sm" placeholder="請輸入自訂取消密碼">
                     </div>
 
                     <div class="text-center mt-12 bg-stone-50 p-8 rounded-3xl border border-stone-100">
                         <label class="flex items-center justify-center gap-3 mb-8 cursor-pointer group">
-                            <input type="checkbox" required class="w-6 h-6 text-orange-500 border-stone-300 rounded focus:ring-orange-500 cursor-pointer">
+                            <input type="checkbox" required class="w-6 h-6 text-orange-500 rounded">
                             <span class="text-stone-700 font-bold group-hover:text-orange-600 transition-colors">我已詳細閱讀並同意上述聲明與注意事項</span>
                         </label>
                         <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg py-4 px-12 rounded-full shadow-lg transition-all transform hover:-translate-y-1">確認送出登記</button>
@@ -272,26 +234,26 @@
             </div>
         </section>
 
-        <!-- 管理者模式與頁尾... (略，保持原有結構) -->
+        <!-- 3. 管理者模式 -->
         <section id="sec-admin" class="hidden-section fade-in">
-             <!-- 管理端設定與名單內容保持原樣 -->
-             <div class="bg-stone-800 rounded-3xl shadow-lg border border-stone-700 p-8 md:p-10 mb-8 text-white">
+            <div class="bg-stone-800 rounded-3xl shadow-lg border border-stone-700 p-8 md:p-10 mb-8 text-white">
                 <h2 class="text-2xl font-bold text-amber-400 border-l-4 border-amber-400 pl-4 mb-6">系統班表與公告設定</h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-stone-900/50 p-6 rounded-2xl border border-stone-700">
-                        <h3 class="text-lg font-bold text-stone-200 mb-4 flex justify-between">門診時段選項 <button onclick="addScheduleSlotInput()" class="text-xs bg-amber-500 text-stone-900 px-3 py-1.5 rounded-lg font-bold">＋新增</button></h3>
-                        <div id="admin-schedule-inputs" class="space-y-3 max-h-80 overflow-y-auto pr-2"></div>
+                        <h3 class="text-lg font-bold text-stone-200 mb-4 flex justify-between">門診時段選項 <button onclick="addScheduleSlotInput()" class="text-xs bg-amber-500 text-stone-900 px-3 py-1.5 rounded-lg font-bold">＋新增一列</button></h3>
+                        <div id="admin-schedule-inputs" class="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar"></div>
                     </div>
                     <div class="bg-stone-900/50 p-6 rounded-2xl border border-stone-700">
-                        <div class="mb-6"><h3 class="text-lg font-bold text-stone-200 mb-3">安全設定</h3><input type="text" id="admin-register-password" class="w-full p-3 border border-stone-600 rounded-xl bg-stone-800 text-stone-200"></div>
-                        <div><h3 class="text-lg font-bold text-stone-200 mb-3">公告編輯</h3><textarea id="admin-schedule-note" class="w-full p-4 border border-stone-600 rounded-xl bg-stone-800 text-stone-200 resize-none min-h-[120px]"></textarea></div>
+                        <div class="mb-6"><h3 class="text-lg font-bold text-stone-200 mb-3">安全設定</h3><label class="text-xs text-stone-400">登記候補密碼</label><input type="text" id="admin-register-password" class="w-full p-3 border border-stone-600 rounded-xl bg-stone-800 text-white mt-1"></div>
+                        <div><h3 class="text-lg font-bold text-stone-200 mb-3">前台公告</h3><textarea id="admin-schedule-note" class="w-full p-4 border border-stone-600 rounded-xl bg-stone-800 text-white resize-none min-h-[120px]"></textarea></div>
                     </div>
                 </div>
-                <div class="mt-8 text-right"><button onclick="saveAdminSettings()" class="bg-teal-500 text-stone-900 font-bold text-lg py-3 px-10 rounded-xl">儲存設定</button></div>
+                <div class="mt-8 text-right"><button onclick="saveAdminSettings()" class="bg-teal-500 text-stone-900 font-bold text-lg py-3 px-10 rounded-xl">儲存系統設定</button></div>
             </div>
+
             <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-8 md:p-10 mb-8">
-                <h2 class="text-2xl font-bold text-orange-600 border-l-4 border-amber-400 pl-4 mb-8">完整候補名單</h2>
-                <div class="overflow-x-auto rounded-2xl border border-stone-100"><table class="w-full text-left text-sm"><thead class="bg-stone-50"><tr><th class="p-4">時間</th><th class="p-4">家屬/電話</th><th class="p-4">動物資訊</th><th class="p-4">候補時段</th><th class="p-4 text-center">狀態</th><th class="p-4 text-center">操作</th></tr></thead><tbody id="admin-tbody" class="divide-y divide-stone-50"></tbody></table></div>
+                <h2 class="text-2xl font-bold text-orange-600 border-l-4 border-amber-400 pl-4 mb-8">管理後台 - 完整名單</h2>
+                <div class="overflow-x-auto rounded-2xl border border-stone-100"><table class="w-full text-left text-sm border-collapse"><thead class="bg-stone-50 text-stone-500"><tr><th class="p-4 border-b">登記時間</th><th class="p-4 border-b">家屬/電話</th><th class="p-4 border-b">動物資訊</th><th class="p-4 border-b">候補時段</th><th class="p-4 border-b text-center">狀態</th><th class="p-4 border-b text-center">操作</th></tr></thead><tbody id="admin-tbody" class="divide-y divide-stone-50"></tbody></table></div>
             </div>
         </section>
     </main>
@@ -307,7 +269,7 @@
             <h3 id="modal-title" class="text-2xl font-bold mb-4 text-orange-600">提示</h3>
             <p id="modal-message" class="text-stone-600 mb-8 leading-relaxed whitespace-pre-line"></p>
             <div id="modal-input-container" class="hidden mb-8"><input type="password" id="modal-input" class="w-full p-4 border-2 border-amber-200 rounded-xl focus:border-amber-400 outline-none font-mono text-lg"></div>
-            <div class="flex justify-end gap-3"><button id="modal-btn-cancel" class="px-5 py-2.5 bg-stone-100 rounded-xl font-bold hidden">取消</button><button id="modal-btn-confirm" class="px-6 py-2.5 text-white bg-orange-500 rounded-xl font-bold shadow-md shadow-orange-200">確認</button></div>
+            <div class="flex justify-end gap-3"><button id="modal-btn-cancel" class="px-5 py-2.5 bg-stone-100 rounded-xl font-bold hidden">取消</button><button id="modal-btn-confirm" class="px-6 py-2.5 text-white bg-orange-500 rounded-xl font-bold">確認</button></div>
         </div>
     </div>
 
@@ -340,50 +302,35 @@
             initAuthWithRetry();
         };
 
-        // 加入自動重試邏輯，應對 400 錯誤與同步延遲
         async function initAuthWithRetry(retryCount = 0) {
             const maxRetries = 3;
             const loadingText = document.getElementById('loading-text');
             const retryHint = document.getElementById('retry-hint');
-
             try {
                 await signInAnonymously(auth);
-                console.log("Auth success");
+                console.log("連線成功");
             } catch (err) {
-                console.error(`Auth attempt ${retryCount + 1} failed:`, err);
-                
+                console.error(`連線重試 ${retryCount + 1}:`, err);
                 if (retryCount < maxRetries) {
                     retryHint.classList.remove('hidden');
-                    loadingText.textContent = `連線同步中... (重試 ${retryCount + 1}/${maxRetries})`;
-                    // 指數退避重試
-                    const delay = Math.pow(2, retryCount) * 1500;
-                    setTimeout(() => initAuthWithRetry(retryCount + 1), delay);
+                    loadingText.textContent = `伺服器同步中... (${retryCount + 1}/${maxRetries})`;
+                    setTimeout(() => initAuthWithRetry(retryCount + 1), 2000);
                 } else {
                     document.getElementById('app-body').classList.remove('is-loading');
-                    showModal('連線失敗', '目前無法與雲端伺服器建立穩定連線。\n\n這可能是 Firebase 權限尚未完全開通，請稍候 5 分鐘再重新整理網頁試試看，或檢查控制台設定。');
+                    showModal('連線暫時中斷', '目前無法連接雲端伺服器。這通常是 Google 系統設定更新後的延遲（約需 5-10 分鐘），請稍候再試。');
                 }
             }
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setupFirestoreListeners();
-            }
-        });
+        onAuthStateChanged(auth, (user) => { if (user) setupFirestoreListeners(); });
 
         function setupFirestoreListeners() {
             const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config');
             onSnapshot(settingsRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    scheduleSettings = docSnap.data();
-                } else {
-                    const defaultSettings = {
-                        slots: ["週一上午 - 詹益萍", "週一下午 - 詹益萍", "週二上午 - 薛彤", "週三上午 - 詹益萍"],
-                        note: "目前門診候補熱烈，請耐心等候。",
-                        registerPassword: "3050"
-                    };
-                    setDoc(settingsRef, defaultSettings);
-                    scheduleSettings = defaultSettings;
+                if (docSnap.exists()) scheduleSettings = docSnap.data();
+                else {
+                    scheduleSettings = { slots: ["週一上午", "週一下午", "週二上午", "週三上午"], note: "歡迎登記候補。", registerPassword: "3050" };
+                    setDoc(settingsRef, scheduleSettings);
                 }
                 renderScheduleElements();
                 document.getElementById('app-body').classList.remove('is-loading');
@@ -398,76 +345,202 @@
             });
         }
 
-        // ... (其他原有 UI 渲染與表單處理邏輯，保持不變) ...
-        // 以下為簡略版，確保專案可執行，實際內容請參考 Canvas 完整版
-        
-        function setupBreedSelect() {
+        // --- 功能模組 ---
+        window.setupBreedSelect = () => {
             const speciesSelect = document.getElementById('species');
             const breedSelect = document.getElementById('breed');
-            speciesSelect.addEventListener('change', (e) => {
+            const breeds = { 
+                "狗": ["米克斯狗", "台灣犬", "瑪爾濟斯", "貴賓", "柴犬", "吉娃娃", "拉布拉多", "其他"],
+                "貓": ["米克斯貓", "英短", "美短", "布偶貓", "曼赤肯", "其他"]
+            };
+            speciesSelect.onchange = (e) => {
                 breedSelect.innerHTML = '<option value="">請選擇品種</option>';
-                const breeds = e.target.value === '狗' ? ["米克斯狗", "瑪爾濟斯", "貴賓", "柴犬"] : ["米克斯貓", "英國短毛貓", "布偶貓"];
-                breeds.forEach(b => {
-                    const opt = document.createElement('option');
-                    opt.value = b; opt.textContent = b;
-                    breedSelect.appendChild(opt);
+                (breeds[e.target.value] || []).forEach(b => {
+                    const opt = document.createElement('option'); opt.value = b; opt.textContent = b; breedSelect.appendChild(opt);
                 });
-            });
-        }
+            };
+        };
 
-        function renderReasons() {
-            const reasons = ["心雜音", "呼吸異常", "咳嗽", "健康檢查", "他院轉診"];
+        window.renderReasons = () => {
+            const reasons = ["他院轉診", "心雜音", "呼吸異常", "咳嗽", "虛弱", "昏倒", "健康檢查", "麻醉前評估"];
             const container = document.getElementById('reasonsContainer');
             reasons.forEach(r => {
                 const div = document.createElement('div');
-                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white"><input type="checkbox" name="visitReason" value="${r}" class="w-5 h-5 text-orange-500"> <span class="text-sm font-bold text-stone-700">${r}</span></label>`;
+                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all"><input type="checkbox" name="visitReason" value="${r}" onchange="checkReasonWarnings()" class="w-5 h-5 text-orange-500"> <span class="text-sm font-bold text-stone-700">${r}</span></label>`;
                 container.appendChild(div);
             });
-        }
+        };
 
-        // Modal 與 Mode 切換邏輯
-        const modal = document.getElementById('custom-modal');
-        const modalContentBox = document.getElementById('modal-content-box');
-        window.showModal = (title, message, onConfirm = null, requireInput = false) => {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').textContent = message;
-            const inputContainer = document.getElementById('modal-input-container');
-            if (requireInput) inputContainer.classList.remove('hidden'); else inputContainer.classList.add('hidden');
-            document.getElementById('modal-btn-confirm').onclick = () => {
-                if (onConfirm) onConfirm(document.getElementById('modal-input').value);
-                window.hideModal();
+        window.checkReasonWarnings = () => {
+            const reasons = Array.from(document.querySelectorAll('input[name="visitReason"]:checked')).map(el => el.value);
+            document.getElementById('coughWarning').classList.toggle('hidden', !reasons.includes('咳嗽'));
+            document.getElementById('referralWarning').classList.toggle('hidden', !reasons.includes('他院轉診'));
+        };
+
+        window.toggleFutureApptFields = () => {
+            const hasAppt = document.querySelector('input[name="hasFutureAppt"]:checked').value === 'yes';
+            document.getElementById('futureApptFields').classList.toggle('hidden', !hasAppt);
+        };
+
+        window.renderScheduleElements = () => {
+            const container = document.getElementById('scheduleSlotsContainer');
+            container.innerHTML = '';
+            scheduleSettings.slots.forEach(slot => {
+                const div = document.createElement('div');
+                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all"><input type="checkbox" name="scheduleSlot" value="${slot}" class="w-5 h-5 text-orange-500"> <span class="text-sm font-bold text-stone-700">${slot}</span></label>`;
+                container.appendChild(div);
+            });
+            const adminInputs = document.getElementById('admin-schedule-inputs');
+            if (adminInputs) {
+                adminInputs.innerHTML = '';
+                scheduleSettings.slots.forEach((s, idx) => {
+                    const div = document.createElement('div');
+                    div.id = `slot-row-${idx}`;
+                    div.className = "flex gap-2";
+                    div.innerHTML = `<input type="text" value="${s}" class="slot-val-input flex-grow p-2 border border-stone-600 rounded bg-stone-800 text-white"><button onclick="document.getElementById('slot-row-${idx}').remove()" class="text-red-400 px-2 font-bold">刪</button>`;
+                    adminInputs.appendChild(div);
+                });
+            }
+            document.getElementById('admin-register-password').value = scheduleSettings.registerPassword;
+            document.getElementById('admin-schedule-note').value = scheduleSettings.note;
+            const noteDiv = document.getElementById('dynamic-schedule-note');
+            if (scheduleSettings.note) { noteDiv.textContent = scheduleSettings.note; noteDiv.classList.remove('hidden'); } else noteDiv.classList.add('hidden');
+        };
+
+        window.addScheduleSlotInput = () => {
+            const container = document.getElementById('admin-schedule-inputs');
+            const idx = Date.now();
+            const div = document.createElement('div');
+            div.id = `slot-row-${idx}`; div.className = "flex gap-2";
+            div.innerHTML = `<input type="text" class="slot-val-input flex-grow p-2 border border-stone-600 rounded bg-stone-800 text-white"><button onclick="document.getElementById('slot-row-${idx}').remove()" class="text-red-400 px-2 font-bold">刪</button>`;
+            container.appendChild(div);
+        };
+
+        window.saveAdminSettings = async () => {
+            const newSlots = Array.from(document.querySelectorAll('.slot-val-input')).map(i => i.value).filter(v => v);
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config'), {
+                slots: newSlots,
+                note: document.getElementById('admin-schedule-note').value,
+                registerPassword: document.getElementById('admin-register-password').value
+            });
+            showModal('已更新', '班表與系統設定已成功同步至雲端。');
+        };
+
+        // --- 表格渲染與邏輯 ---
+        function mask(str, start, end) { if (!str) return ""; return str.substring(0, start) + "Ｏ" + str.substring(end); }
+
+        window.renderVisitorTable = () => {
+            const tbody = document.getElementById('visitor-tbody');
+            const empty = document.getElementById('visitor-empty');
+            tbody.innerHTML = '';
+            if (waitlistData.length === 0) empty.classList.remove('hidden'); else {
+                empty.classList.add('hidden');
+                waitlistData.forEach((item, idx) => {
+                    const tr = document.createElement('tr');
+                    const isDone = item.status === 'done';
+                    tr.className = isDone ? "opacity-40 bg-stone-50" : "hover:bg-orange-50";
+                    tr.innerHTML = `
+                        <td class="p-4 text-center border-b font-bold text-stone-400">${idx + 1}</td>
+                        <td class="p-4 border-b text-xs text-stone-500">${item.timestamp}</td>
+                        <td class="p-4 border-b font-bold">${item.ownerName.charAt(0) + item.ownerTitle}</td>
+                        <td class="p-4 border-b text-sm text-stone-500 font-mono">${item.phone.slice(0, 2) + "****" + item.phone.slice(-3)}</td>
+                        <td class="p-4 border-b font-bold">${mask(item.petName, 1, 2)}</td>
+                        <td class="p-4 border-b text-xs leading-relaxed">${(item.selectedSchedule || []).join('<br>')}</td>
+                        <td class="p-4 border-b text-center"><span class="px-2 py-1 rounded-full text-xs font-bold ${isDone ? 'bg-teal-100 text-teal-700' : 'bg-orange-100 text-orange-700'}">${isDone ? '已候補' : '候補中'}</span></td>
+                        <td class="p-4 border-b text-center"><button onclick="promptSelfCancel('${item.id}')" class="text-xs text-stone-400 hover:text-red-500 underline font-bold">取消</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        };
+
+        window.renderAdminTable = () => {
+            const tbody = document.getElementById('admin-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            waitlistData.forEach(item => {
+                const tr = document.createElement('tr');
+                const isDone = item.status === 'done';
+                tr.innerHTML = `
+                    <td class="p-4 border-b text-xs">${item.timestamp}</td>
+                    <td class="p-4 border-b"><strong>${item.ownerName}</strong><br><span class="text-xs text-stone-500">${item.phone}</span></td>
+                    <td class="p-4 border-b text-xs"><strong>${item.petName}</strong> (${item.species})<br>${item.breed} / ${item.weight}kg</td>
+                    <td class="p-4 border-b text-xs">${(item.selectedSchedule || []).join('<br>')}</td>
+                    <td class="p-4 border-b text-center"><span class="px-2 py-1 rounded-full text-xs font-bold ${isDone ? 'bg-teal-100 text-teal-700' : 'bg-orange-100 text-orange-700'}">${isDone ? '已候補' : '候補中'}</span></td>
+                    <td class="p-4 border-b text-center"><button onclick="toggleDone('${item.id}', '${isDone ? 'waiting' : 'done'}')" class="text-xs bg-teal-500 text-white px-2 py-1 rounded">${isDone ? '還原' : '完成'}</button> <button onclick="adminDelete('${item.id}')" class="text-xs bg-red-500 text-white px-2 py-1 rounded ml-1">刪除</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.toggleDone = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status }); };
+        window.adminDelete = async (id) => { if (confirm('確定要永久刪除此筆資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
+
+        window.handleRegisterSubmit = async (e) => {
+            e.preventDefault();
+            const selectedSchedule = Array.from(document.querySelectorAll('input[name="scheduleSlot"]:checked')).map(el => el.value);
+            if (selectedSchedule.length === 0) { showModal('提醒', '請至少勾選一個可候補時段。'); return; }
+            const data = {
+                createdAt: Date.now(),
+                timestamp: new Date().toLocaleString(),
+                ownerName: document.getElementById('ownerName').value,
+                ownerTitle: document.getElementById('ownerTitle').value,
+                phone: document.getElementById('phone').value,
+                petName: document.getElementById('petName').value,
+                species: document.getElementById('species').value,
+                breed: document.getElementById('breed').value,
+                age: document.getElementById('age').value + document.getElementById('ageUnit').value,
+                sex: document.getElementById('sex').value,
+                neutered: document.getElementById('neutered').value,
+                weight: document.getElementById('weight').value,
+                selectedSchedule,
+                reasons: Array.from(document.querySelectorAll('input[name="visitReason"]:checked')).map(el => el.value),
+                cancelPassword: document.getElementById('cancelPassword').value,
+                status: 'waiting'
             };
-            modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
-            modalContentBox.classList.remove('scale-95');
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'waitlist'), data);
+            showModal('登記成功', '資料已同步至雲端，若有時段釋出將主動去電聯繫。', () => switchMode('visitor'));
+            e.target.reset();
         };
-        window.hideModal = () => {
-            modal.classList.add('opacity-0'); modalContentBox.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
+
+        window.promptSelfCancel = (id) => {
+            const item = waitlistData.find(i => i.id === id);
+            showModal('取消驗證', '請輸入您登記時設定的「取消密碼」：', async (pwd) => {
+                if (pwd === item.cancelPassword) { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); showModal('已取消', '資料已從系統中移除。'); }
+                else showModal('錯誤', '密碼不正確。');
+            }, true);
         };
-        
+
+        // --- 核心導覽 ---
         window.switchMode = (mode) => {
             document.getElementById('sec-visitor').classList.toggle('hidden-section', mode !== 'visitor');
             document.getElementById('sec-register').classList.toggle('hidden-section', mode !== 'register');
             document.getElementById('sec-admin').classList.toggle('hidden-section', mode !== 'admin');
+            document.getElementById('btn-visitor').className = mode === 'visitor' ? 'px-5 py-2.5 rounded-full font-bold bg-orange-500 text-white shadow-md' : 'px-5 py-2.5 rounded-full font-bold text-stone-500 hover:bg-stone-100';
+            document.getElementById('btn-register').className = mode === 'register' ? 'px-5 py-2.5 rounded-full font-bold bg-orange-500 text-white shadow-md' : 'px-5 py-2.5 rounded-full font-bold text-stone-500 hover:bg-stone-100';
         };
 
         window.promptLogin = (target) => {
             if (target === 'register') {
-                showModal('驗證密碼', '請輸入櫃檯提供的登記密碼：', (pwd) => {
-                    if (pwd === scheduleSettings.registerPassword) window.switchMode('register'); else showModal('錯誤', '密碼不正確');
-                }, true);
+                showModal('看診驗證', '請輸入櫃檯提供的登記密碼：', (pwd) => { if (pwd === scheduleSettings.registerPassword) switchMode('register'); else showModal('錯誤', '密碼不正確。'); }, true);
             } else if (target === 'admin') {
-                showModal('管理登入', '請輸入管理端密碼：', (pwd) => {
-                    if (pwd === 'gaze250305') window.switchMode('admin'); else showModal('錯誤', '密碼不正確');
-                }, true);
+                showModal('管理員登入', '請輸入管理端後台密碼：', (pwd) => { if (pwd === 'gaze250305') switchMode('admin'); else showModal('錯誤', '密碼不正確。'); }, true);
             }
         };
 
-        // 剩餘表格渲染邏輯與表單處理 (略)
-        function renderVisitorTable() { /* 保持原樣 */ }
-        function renderAdminTable() { /* 保持原樣 */ }
-        function renderScheduleElements() { /* 保持原樣 */ }
-        window.handleRegisterSubmit = async (e) => { /* 保持原樣 */ e.preventDefault(); showModal('測試', '目前為測試模式，請確保連線成功。'); };
+        window.showModal = (title, message, onConfirm, requireInput) => {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-input-container').classList.toggle('hidden', !requireInput);
+            document.getElementById('modal-btn-confirm').onclick = () => { const val = document.getElementById('modal-input').value; hideModal(); if (onConfirm) onConfirm(val); };
+            document.getElementById('modal-btn-cancel').classList.toggle('hidden', !requireInput);
+            document.getElementById('custom-modal').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('custom-modal').classList.remove('opacity-0'); document.getElementById('modal-content-box').classList.remove('scale-95'); }, 10);
+        };
+        window.hideModal = () => {
+            document.getElementById('custom-modal').classList.add('opacity-0'); document.getElementById('modal-content-box').classList.add('scale-95');
+            setTimeout(() => document.getElementById('custom-modal').classList.add('hidden'), 300);
+        };
     </script>
 </body>
 </html>
