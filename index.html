@@ -188,16 +188,16 @@
                         </div>
                     </div>
 
-                    <!-- 候補時段區 -->
-                    <h3 class="text-lg font-bold text-orange-700 mb-3 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">2</span>
+                    <!-- 可候補時段區 -->
+                    <h3 class="text-2xl font-bold text-orange-700 mb-4 bg-orange-50 p-4 px-6 rounded-2xl flex items-center gap-2">
+                        <span class="bg-white text-orange-500 rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-sm font-bold">2</span>
                         可候補時段與醫師 (多選)
                     </h3>
-                    <div class="mb-5 ml-2">
-                        <p class="text-sm text-stone-500 font-medium leading-relaxed">請勾選您 <strong class="text-orange-600">能隨時前來</strong> 的時段。若有空檔，櫃檯將去電通知。</p>
-                        <div id="dynamic-schedule-note" class="mt-3 text-sm text-teal-800 bg-teal-50 border border-teal-200 p-3 rounded-xl whitespace-pre-line hidden"></div>
+                    <div class="mb-6 ml-2">
+                        <p class="text-lg text-stone-600 font-medium leading-relaxed italic">請勾選您 <strong class="text-orange-600">能隨時前來</strong> 的時段。若有空檔，櫃檯將去電通知。</p>
+                        <div id="dynamic-schedule-note" class="mt-4 text-sm text-teal-800 bg-teal-50 border border-teal-200 p-4 rounded-xl whitespace-pre-line hidden"></div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-10" id="scheduleSlotsContainer"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10" id="scheduleSlotsContainer"></div>
 
                     <!-- 看診原因區 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-5 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
@@ -217,54 +217,54 @@
                     </div>
 
                     <!-- Fear Free 醫療理念衛教區 -->
-                    <div class="mb-12 bg-[#F2FAFA] border border-teal-100 rounded-3xl p-6 md:p-8 shadow-sm">
-                        <h3 class="text-xl font-black text-teal-800 flex items-center gap-2 mb-4">
-                            <span class="text-2xl">💙</span> 零恐懼醫療 (Fear Free)：行為觀察與就診準備
+                    <div class="mb-12 bg-[#F2FAFA] border border-teal-100 rounded-3xl p-8 md:p-10 shadow-sm">
+                        <h3 class="text-2xl font-black text-teal-800 flex items-center gap-2 mb-6">
+                            <span class="text-3xl">💙</span> 零恐懼醫療 (Fear Free)：行為觀察與就診準備
                         </h3>
-                        <div class="space-y-6 text-sm leading-relaxed text-teal-900 font-medium">
-                            <div class="bg-white/60 p-5 rounded-2xl border border-teal-50 shadow-sm">
-                                <p class="mb-3 text-teal-800 font-bold">💡 請觀察毛孩是否曾出現以下緊迫行為：</p>
-                                <ul class="list-disc pl-5 space-y-2 text-stone-700">
+                        <div class="space-y-8 text-lg leading-relaxed text-teal-900 font-medium">
+                            <div class="bg-white/60 p-6 rounded-2xl border border-teal-50 shadow-sm">
+                                <p class="mb-4 text-teal-800 font-bold text-xl">💡 請觀察毛孩是否曾出現以下緊迫行為：</p>
+                                <ul class="list-disc pl-8 space-y-3 text-stone-700 text-lg">
                                     <li><strong class="text-teal-700">共同表現：</strong>在外出、搭車或醫院出現發抖、喘氣、躲藏。</li>
                                     <li><strong class="text-teal-700">狗狗特有：</strong>在醫院門口抗拒進入、在診間內不斷嘗試尋找出口想要逃離。</li>
                                     <li><strong class="text-teal-700">貓咪特有：</strong>全身僵硬、定住不動（凍結反應，像石頭一樣）、或是瞳孔極度放大。</li>
                                 </ul>
                             </div>
                             
-                            <p>
+                            <p class="text-lg">
                                 若毛孩有上述反應，代表壓力正影響著他們的心理與生理。秉持 Fear Free 理念，我們建議諮詢並準備 <strong class="text-orange-600">就診前安神藥物 (PVPs)</strong>。這類藥物能幫助毛孩大腦放鬆，讓醫師取得最精準的醫療數據。
                             </p>
                             
-                            <div class="bg-orange-50 p-4 rounded-xl border border-orange-100 italic text-stone-600 text-xs">
+                            <div class="bg-orange-50 p-5 rounded-xl border border-orange-100 italic text-stone-600 text-base">
                                 提醒：若您的毛孩未曾於本醫院就診過，建議您可以先諮詢毛孩平時熟悉的<strong class="text-orange-700 font-bold underline decoration-orange-200">家庭醫師</strong>協助開立 PVPs 藥物。
                             </div>
 
                             <!-- 就診準備指南 -->
-                            <div class="mt-8 pt-8 border-t border-teal-100">
-                                <h4 class="font-black text-teal-800 mb-5 flex items-center gap-2">🎁 如何準備一場 Fear Free 的就診？</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                                    <div class="p-4 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-1">1. 微微空腹</strong>
+                            <div class="mt-10 pt-10 border-t border-teal-100">
+                                <h4 class="font-black text-teal-800 mb-6 text-xl flex items-center gap-2">🎁 如何準備一場 Fear Free 的就診？</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-base">
+                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
+                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">1. 微微空腹</strong>
                                         就診前 2-4 小時減少餵食，可預防乘車嘔吐，並增加在診間內零食獎勵的吸引力。
                                     </div>
-                                    <div class="p-4 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-1">2. 零食大餐</strong>
+                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
+                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">2. 零食大餐</strong>
                                         請攜帶 2-3 種毛孩最愛、平常吃不到的零食（建議剪碎成碎米粒大小，方便頻繁給予）。
                                     </div>
-                                    <div class="p-4 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-1">3. 家的味道</strong>
+                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
+                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">3. 家的味道</strong>
                                         攜帶毛孩熟悉的玩具、或是墊過家裡床舖、有家長味道的毛巾或 T-shirt 提供安全感。
                                     </div>
-                                    <div class="p-4 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-1">4. 籠子減敏</strong>
+                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
+                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">4. 籠子減敏</strong>
                                         就診前幾天先將運輸籠放在家中活動區，放入零食讓毛孩自由進出，將籠子視為避風港。
                                     </div>
-                                    <div class="p-4 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-1">5. 提前排泄</strong>
+                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
+                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">5. 提前排泄</strong>
                                         進入醫院前先讓毛孩排尿便。憋尿或憋便的不適感會大幅增加就診時的焦慮。
                                     </div>
-                                    <div class="p-4 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-1">6. 從容就醫</strong>
+                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
+                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">6. 從容就醫</strong>
                                         預留充裕交通時間，家長的從容情緒是毛孩最好的安定劑。若您感到壓力，毛孩也會感受到。
                                     </div>
                                 </div>
@@ -344,7 +344,7 @@
         <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-lg transform scale-95 transition-transform duration-300">
             <h3 class="text-2xl font-bold mb-4 text-orange-600">更新候補時段</h3>
             <p id="update-modal-info" class="text-stone-600 mb-6 text-sm font-medium"></p>
-            <div id="update-slots-container" class="grid grid-cols-2 gap-3 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+            <div id="update-slots-container" class="grid grid-cols-1 gap-3 mb-8 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                 <!-- 動態注入時段選項 -->
             </div>
             <div class="flex justify-end gap-3 border-t pt-6">
@@ -492,15 +492,19 @@
 
         window.renderScheduleElements = () => {
             const sortedSlots = scheduleSettings.slots || [];
+
+            // 1. 更新家屬登記頁面的 Checkboxes (字體放大)
             const regContainer = document.getElementById('scheduleSlotsContainer');
             if (regContainer) {
                 regContainer.innerHTML = '';
                 sortedSlots.forEach(slot => {
                     const div = document.createElement('div');
-                    div.innerHTML = `<label class="flex items-center gap-3 p-4 border border-stone-100 rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm focus-within:ring-2 focus-within:ring-orange-200"><input type="checkbox" name="scheduleSlot" value="${slot}" class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-[10px] font-bold text-stone-700 leading-tight">${slot}</span></label>`;
+                    div.innerHTML = `<label class="flex items-center gap-4 p-5 border border-stone-100 rounded-2xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm focus-within:ring-2 focus-within:ring-orange-200"><input type="checkbox" name="scheduleSlot" value="${slot}" class="w-6 h-6 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-xl font-bold text-stone-700 leading-tight">${slot}</span></label>`;
                     regContainer.appendChild(div);
                 });
             }
+            
+            // 2. 更新管理後台的 Input Rows
             const adminInputs = document.getElementById('admin-schedule-inputs');
             if (adminInputs) {
                 adminInputs.innerHTML = '';
@@ -510,6 +514,7 @@
                 });
                 setupDragAndDrop(adminInputs);
             }
+            
             document.getElementById('admin-register-password').value = scheduleSettings.registerPassword || "3050";
             document.getElementById('admin-schedule-note').value = scheduleSettings.note || "";
             const noteDiv = document.getElementById('dynamic-schedule-note');
@@ -521,7 +526,9 @@
             div.className = "drag-row flex gap-2 bg-stone-700 p-1 rounded border border-stone-600";
             div.draggable = true;
             div.innerHTML = `
-                <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg></div>
+                <div class="drag-handle">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                </div>
                 <input type="text" value="${val}" class="slot-val-input flex-grow p-2 border-0 rounded bg-stone-800 text-white font-medium focus:ring-1 focus:ring-amber-500 outline-none">
                 <button onclick="this.parentElement.remove()" class="text-red-400 px-3 font-bold hover:text-red-300 transition-colors">✕</button>
             `;
@@ -529,14 +536,37 @@
         }
 
         function setupDragAndDrop(container) {
-            container.addEventListener('dragstart', e => e.target.closest('.drag-row')?.classList.add('dragging'));
-            container.addEventListener('dragend', e => e.target.closest('.drag-row')?.classList.remove('dragging'));
-            container.addEventListener('dragover', e => {
-                e.preventDefault();
-                const afterElement = getDragAfterElement(container, e.clientY);
-                const dragging = document.querySelector('.dragging');
-                if (dragging) { if (afterElement == null) container.appendChild(dragging); else container.insertBefore(dragging, afterElement); }
-            });
+            container.removeEventListener('dragstart', handleDragStart);
+            container.removeEventListener('dragend', handleDragEnd);
+            container.removeEventListener('dragover', handleDragOver);
+
+            container.addEventListener('dragstart', handleDragStart);
+            container.addEventListener('dragend', handleDragEnd);
+            container.addEventListener('dragover', handleDragOver);
+        }
+
+        function handleDragStart(e) {
+            const row = e.target.closest('.drag-row');
+            if (row) row.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            const row = e.target.closest('.drag-row');
+            if (row) row.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const container = e.currentTarget;
+            const afterElement = getDragAfterElement(container, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            if (dragging) {
+                if (afterElement == null) {
+                    container.appendChild(dragging);
+                } else {
+                    container.insertBefore(dragging, afterElement);
+                }
+            }
         }
 
         function getDragAfterElement(container, y) {
@@ -544,26 +574,41 @@
             return draggableElements.reduce((closest, child) => {
                 const box = child.getBoundingClientRect();
                 const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) return { offset: offset, element: child }; else return closest;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
         window.addScheduleSlotInput = () => {
             const container = document.getElementById('admin-schedule-inputs');
-            container.appendChild(createAdminSlotRow('', Date.now()));
+            const row = createAdminSlotRow('', Date.now());
+            container.appendChild(row);
             container.scrollTop = container.scrollHeight;
         };
 
         window.saveAdminSettings = async () => {
             const adminInputs = document.getElementById('admin-schedule-inputs');
             const newSlots = Array.from(adminInputs.querySelectorAll('.slot-val-input')).map(i => i.value).filter(v => v.trim());
+            
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config'), { slots: newSlots, note: document.getElementById('admin-schedule-note').value, registerPassword: document.getElementById('admin-register-password').value });
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config'), {
+                    slots: newSlots,
+                    note: document.getElementById('admin-schedule-note').value,
+                    registerPassword: document.getElementById('admin-register-password').value
+                });
                 showModal('已更新', '班表與衛教公告已成功同步。');
             } catch(e) { showModal('儲存失敗', '請檢查網路連線。'); }
         };
 
-        function mask(str) { if (!str) return ""; if (str.length <= 1) return str; return str.charAt(0) + "Ｏ" + (str.length > 2 ? str.substring(2) : ""); }
+        // --- 表格渲染與自動隱藏邏輯 ---
+        function mask(str) { 
+            if (!str) return ""; 
+            if (str.length <= 1) return str;
+            return str.charAt(0) + "Ｏ" + (str.length > 2 ? str.substring(2) : ""); 
+        }
 
         window.renderVisitorTable = () => {
             const tbody = document.getElementById('visitor-tbody');
@@ -576,11 +621,12 @@
                 activeWaitlist.forEach((item, idx) => {
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-orange-50 transition-colors";
+                    const phoneMasked = item.phone.slice(0, 2) + "****" + item.phone.slice(-3);
                     tr.innerHTML = `
                         <td class="p-4 text-center border-b font-bold text-stone-300">${idx + 1}</td>
                         <td class="p-4 border-b text-xs text-stone-500 font-medium">${item.timestamp}</td>
                         <td class="p-4 border-b font-bold text-stone-700">${item.ownerName.charAt(0) + (item.ownerTitle || "")}</td>
-                        <td class="p-4 border-b text-sm text-stone-500 font-mono">${item.phone.slice(0, 2) + "****" + item.phone.slice(-3)}</td>
+                        <td class="p-4 border-b text-sm text-stone-500 font-mono">${phoneMasked}</td>
                         <td class="p-4 border-b font-bold text-stone-700">${mask(item.petName)}</td>
                         <td class="p-4 border-b text-xs leading-relaxed font-medium text-stone-600">${(item.selectedSchedule || []).join('<br>')}</td>
                         <td class="p-4 border-b text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 text-orange-700 uppercase tracking-tighter">Waiting</span></td>
@@ -610,9 +656,20 @@
                     <td class="p-4 border-b text-xs text-stone-500">${item.timestamp}</td>
                     <td class="p-4 border-b"><strong>${item.ownerName}</strong><br><span class="text-xs text-stone-500 font-mono">${item.phone}</span></td>
                     <td class="p-4 border-b text-xs font-medium"><strong>${item.petName}</strong> (${item.species})<br>${item.breed}</td>
-                    <td class="p-4 border-b text-xs font-medium"><span class="text-orange-600 font-bold">${(item.selectedSchedule || []).join(', ')}</span>${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">預約：${item.futureApptDate}</div>` : ''}</td>
-                    <td class="p-4 border-b text-center"><span class="px-2 py-1 rounded-full text-xs font-bold ${isDone ? 'bg-teal-100 text-teal-700' : (isExpired ? 'bg-stone-200 text-stone-600' : 'bg-orange-100 text-orange-700')}">${isDone ? '已完成' : (isExpired ? '已過期' : '候補中')}</span><div class="text-[10px] mt-1 text-stone-400 font-mono">PWD: ${item.cancelPassword}</div></td>
-                    <td class="p-4 border-b text-center whitespace-nowrap"><button onclick="toggleDone('${item.id}', '${isDone ? 'waiting' : 'done'}')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">${isDone ? '還原' : '完成'}</button> <button onclick="adminDelete('${item.id}')" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg ml-1 shadow-sm font-bold transition-colors">刪除</button></td>
+                    <td class="p-4 border-b text-xs font-medium">
+                        <span class="text-orange-600 font-bold">${(item.selectedSchedule || []).join(', ')}</span>
+                        ${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">預約：${item.futureApptDate}</div>` : ''}
+                    </td>
+                    <td class="p-4 border-b text-center">
+                        <span class="px-2 py-1 rounded-full text-xs font-bold ${isDone ? 'bg-teal-100 text-teal-700' : (isExpired ? 'bg-stone-200 text-stone-600' : 'bg-orange-100 text-orange-700')}">
+                            ${isDone ? '已完成' : (isExpired ? '已過期' : '候補中')}
+                        </span>
+                        <div class="text-[10px] mt-1 text-stone-400 font-mono">PWD: ${item.cancelPassword}</div>
+                    </td>
+                    <td class="p-4 border-b text-center whitespace-nowrap">
+                        <button onclick="toggleDone('${item.id}', '${isDone ? 'waiting' : 'done'}')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">${isDone ? '還原' : '完成'}</button> 
+                        <button onclick="adminDelete('${item.id}')" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg ml-1 shadow-sm font-bold transition-colors">刪除</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -621,6 +678,7 @@
         window.toggleDone = async (id, status) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status });
         window.adminDelete = async (id) => { if (confirm('確定要永久刪除此筆資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
 
+        // --- 更新時段邏輯 ---
         window.promptSelfUpdate = (id) => {
             const item = waitlistData.find(i => i.id === id);
             showModal('身分驗證', `毛孩【${mask(item.petName)}】變更時段，請輸入當初設定的「自訂密碼」：`, pwd => { if (pwd === item.cancelPassword) openUpdateModal(item); else showModal('驗證失敗', '密碼不正確。'); }, true);
@@ -633,7 +691,7 @@
             scheduleSettings.slots.forEach(slot => {
                 const isChecked = (item.selectedSchedule || []).includes(slot) ? 'checked' : '';
                 const div = document.createElement('div');
-                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="updateSlot" value="${slot}" ${isChecked} class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-[10px] font-bold text-stone-700 leading-tight">${slot}</span></label>`;
+                div.innerHTML = `<label class="flex items-center gap-4 p-5 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="updateSlot" value="${slot}" ${isChecked} class="w-6 h-6 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-lg font-bold text-stone-700 leading-tight">${slot}</span></label>`;
                 container.appendChild(div);
             });
             document.getElementById('update-modal-btn-save').onclick = async () => {
