@@ -110,7 +110,7 @@
                 </div>
                 <div id="visitor-empty" class="text-center py-16 text-stone-300 font-medium hidden">
                     <div class="text-5xl mb-3 opacity-30 text-stone-200">📋</div>
-                    目前尚無候補名單
+                    目前尚無有效候補登記
                 </div>
             </div>
         </section>
@@ -283,7 +283,22 @@
         <button onclick="promptLogin('admin')" class="absolute bottom-4 right-4 text-transparent hover:text-stone-300 text-xs cursor-default transition-colors">管理員登入</button>
     </footer>
 
-    <!-- Modals -->
+    <!-- Update Modal (更新時段專用) -->
+    <div id="update-modal" class="fixed inset-0 bg-stone-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-lg transform scale-95 transition-transform duration-300">
+            <h3 class="text-2xl font-bold mb-4 text-orange-600">更新候補時段</h3>
+            <p id="update-modal-info" class="text-stone-600 mb-6 text-sm font-medium"></p>
+            <div id="update-slots-container" class="grid grid-cols-2 gap-3 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                <!-- 動態注入時段選項 -->
+            </div>
+            <div class="flex justify-end gap-3 border-t pt-6">
+                <button onclick="hideUpdateModal()" class="px-5 py-2 bg-stone-100 rounded-xl font-bold text-stone-500">取消變更</button>
+                <button id="update-modal-btn-save" class="px-8 py-2 text-white bg-orange-500 rounded-xl font-bold shadow-md shadow-orange-200">儲存更新</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals (通用提示) -->
     <div id="custom-modal" class="fixed inset-0 bg-stone-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-md transform scale-95 transition-transform duration-300" id="modal-content-box">
             <h3 id="modal-title" class="text-2xl font-bold mb-4 text-orange-600">提示</h3>
@@ -422,7 +437,7 @@
         window.renderScheduleElements = () => {
             const sortedSlots = scheduleSettings.slots || [];
 
-            // 1. 更新家屬登記頁面的 Checkboxes (嚴格遵循排序)
+            // 1. 更新家屬登記頁面的 Checkboxes
             const regContainer = document.getElementById('scheduleSlotsContainer');
             if (regContainer) {
                 regContainer.innerHTML = '';
@@ -465,7 +480,6 @@
         }
 
         function setupDragAndDrop(container) {
-            // 清除現有監聽器避免重複綁定 (雖然 innerHTML 已清空，但為求保險)
             container.removeEventListener('dragstart', handleDragStart);
             container.removeEventListener('dragend', handleDragEnd);
             container.removeEventListener('dragover', handleDragOver);
@@ -521,7 +535,6 @@
 
         window.saveAdminSettings = async () => {
             const adminInputs = document.getElementById('admin-schedule-inputs');
-            // 嚴格按照 DOM 排序抓取資料
             const newSlots = Array.from(adminInputs.querySelectorAll('.slot-val-input')).map(i => i.value).filter(v => v.trim());
             
             try {
@@ -534,7 +547,7 @@
             } catch(e) { showModal('儲存失敗', '請檢查網路連線。'); }
         };
 
-        // --- 表格渲染與自動偵測邏輯 ---
+        // --- 表格渲染與自動隱藏邏輯 ---
         function mask(str) { 
             if (!str) return ""; 
             if (str.length <= 1) return str;
@@ -545,19 +558,24 @@
             const tbody = document.getElementById('visitor-tbody');
             const empty = document.getElementById('visitor-empty');
             tbody.innerHTML = '';
-            if (waitlistData.length === 0) empty.classList.remove('hidden'); else {
+            
+            const today = new Date().toLocaleDateString('en-CA'); 
+            
+            // 過濾：只顯示「候補中(waiting)」且「未過期」的資料
+            const activeWaitlist = waitlistData.filter(item => {
+                const isWaiting = item.status === 'waiting';
+                const isNotExpired = !(item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today);
+                return isWaiting && isNotExpired;
+            });
+
+            if (activeWaitlist.length === 0) {
+                empty.classList.remove('hidden');
+            } else {
                 empty.classList.add('hidden');
-                const today = new Date().toLocaleDateString('en-CA'); 
-                waitlistData.forEach((item, idx) => {
+                activeWaitlist.forEach((item, idx) => {
                     const tr = document.createElement('tr');
-                    const isDone = item.status === 'done';
-                    const isExpired = item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today;
-                    const isDimmed = isDone || isExpired;
-                    tr.className = isDimmed ? "opacity-30 bg-stone-50" : "hover:bg-orange-50 transition-colors";
-                    let phoneMasked = isExpired ? "**********" : item.phone.slice(0, 2) + "****" + item.phone.slice(-3);
-                    let statusLabel = `<span class="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 text-orange-700 uppercase tracking-tighter">Waiting</span>`;
-                    if (isDone) statusLabel = `<span class="px-3 py-1 rounded-full text-[10px] font-black bg-teal-100 text-teal-700 uppercase tracking-tighter">Done</span>`;
-                    if (isExpired) statusLabel = `<span class="px-3 py-1 rounded-full text-[10px] font-black bg-stone-200 text-stone-600 uppercase tracking-tighter whitespace-nowrap">Expired</span>`;
+                    tr.className = "hover:bg-orange-50 transition-colors";
+                    const phoneMasked = item.phone.slice(0, 2) + "****" + item.phone.slice(-3);
                     tr.innerHTML = `
                         <td class="p-4 text-center border-b font-bold text-stone-300">${idx + 1}</td>
                         <td class="p-4 border-b text-xs text-stone-500 font-medium">${item.timestamp}</td>
@@ -565,8 +583,13 @@
                         <td class="p-4 border-b text-sm text-stone-500 font-mono">${phoneMasked}</td>
                         <td class="p-4 border-b font-bold text-stone-700">${mask(item.petName)}</td>
                         <td class="p-4 border-b text-xs leading-relaxed font-medium text-stone-600">${(item.selectedSchedule || []).join('<br>')}</td>
-                        <td class="p-4 border-b text-center">${statusLabel}</td>
-                        <td class="p-4 border-b text-center">${isDimmed ? '<span class="text-stone-300 text-xs">-</span>' : `<button onclick="promptSelfCancel('${item.id}')" class="text-xs text-stone-400 hover:text-red-500 underline font-bold transition-colors">取消</button>`}</td>
+                        <td class="p-4 border-b text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 text-orange-700 uppercase tracking-tighter">Waiting</span></td>
+                        <td class="p-4 border-b text-center">
+                            <div class="flex flex-col gap-1">
+                                <button onclick="promptSelfUpdate('${item.id}')" class="text-[10px] text-teal-600 hover:underline font-bold transition-colors">更新時段</button>
+                                <button onclick="promptSelfCancel('${item.id}')" class="text-[10px] text-stone-400 hover:text-red-500 underline font-bold transition-colors">取消登記</button>
+                            </div>
+                        </td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -578,11 +601,14 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             const today = new Date().toLocaleDateString('en-CA');
+            
+            // 後台保留「所有」歷史紀錄，並標註狀態
             waitlistData.forEach(item => {
                 const tr = document.createElement('tr');
                 const isDone = item.status === 'done';
                 const isExpired = item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today;
-                tr.className = (isDone || isExpired) ? "opacity-40 grayscale" : "hover:bg-stone-50 transition-colors";
+                
+                tr.className = (isDone || isExpired) ? "opacity-40 grayscale bg-stone-50" : "hover:bg-stone-50 transition-colors";
                 tr.innerHTML = `
                     <td class="p-4 border-b text-xs text-stone-500">${item.timestamp}</td>
                     <td class="p-4 border-b"><strong>${item.ownerName}</strong><br><span class="text-xs text-stone-500 font-mono">${item.phone}</span></td>
@@ -608,6 +634,57 @@
 
         window.toggleDone = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status }); };
         window.adminDelete = async (id) => { if (confirm('確定要從候補名單中永久刪除此筆資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
+
+        // --- 更新時段邏輯 ---
+        window.promptSelfUpdate = (id) => {
+            const item = waitlistData.find(i => i.id === id);
+            showModal('身分驗證', `毛孩【${mask(item.petName)}】您好，更新候補時段請輸入當初登記的「自訂密碼」：`, (pwd) => {
+                if (pwd === item.cancelPassword) {
+                    openUpdateModal(item);
+                } else {
+                    showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。');
+                }
+            }, true);
+        };
+
+        function openUpdateModal(item) {
+            const container = document.getElementById('update-slots-container');
+            const infoText = document.getElementById('update-modal-info');
+            infoText.textContent = `毛孩：${item.petName} | 家屬：${item.ownerName}`;
+            container.innerHTML = '';
+            
+            scheduleSettings.slots.forEach(slot => {
+                const isChecked = (item.selectedSchedule || []).includes(slot) ? 'checked' : '';
+                const div = document.createElement('div');
+                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="updateSlot" value="${slot}" ${isChecked} class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-xs font-bold text-stone-700 leading-tight">${slot}</span></label>`;
+                container.appendChild(div);
+            });
+
+            document.getElementById('update-modal-btn-save').onclick = async () => {
+                const selected = Array.from(document.querySelectorAll('input[name="updateSlot"]:checked')).map(el => el.value);
+                if (selected.length === 0) {
+                    alert('請至少勾選一個候補時段，或直接選擇取消登記。');
+                    return;
+                }
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', item.id), { selectedSchedule: selected });
+                    hideUpdateModal();
+                    showModal('更新成功', '您的候補時段已重新同步至醫院。');
+                } catch(e) {
+                    alert('更新失敗，請檢查網路連線。');
+                }
+            };
+
+            const modal = document.getElementById('update-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); modal.children[0].classList.remove('scale-95'); }, 10);
+        }
+
+        window.hideUpdateModal = () => {
+            const modal = document.getElementById('update-modal');
+            modal.classList.add('opacity-0'); modal.children[0].classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
 
         window.handleRegisterSubmit = async (e) => {
             e.preventDefault();
