@@ -101,6 +101,7 @@
                                 <th class="p-4 font-bold border-b border-stone-100">聯絡電話</th>
                                 <th class="p-4 font-bold border-b border-stone-100">動物名</th>
                                 <th class="p-4 font-bold border-b border-stone-100">可候補時段與醫師</th>
+                                <th class="p-4 font-bold border-b border-stone-100">原預約紀錄</th>
                                 <th class="p-4 font-bold border-b border-stone-100 text-center">狀態</th>
                                 <th class="p-4 font-bold border-b border-stone-100 text-center">操作</th>
                             </tr>
@@ -599,7 +600,7 @@
                     note: document.getElementById('admin-schedule-note').value,
                     registerPassword: document.getElementById('admin-register-password').value
                 });
-                showModal('已更新', '班表與衛教公告已成功同步。');
+                showModal('已更新', '班表與系統公告設定已成功同步至雲端伺服器，前台排序已更新。');
             } catch(e) { showModal('儲存失敗', '請檢查網路連線。'); }
         };
 
@@ -614,14 +615,33 @@
             const tbody = document.getElementById('visitor-tbody');
             const empty = document.getElementById('visitor-empty');
             tbody.innerHTML = '';
+            
             const today = new Date().toLocaleDateString('en-CA'); 
-            const activeWaitlist = waitlistData.filter(item => item.status === 'waiting' && !(item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today));
-            if (activeWaitlist.length === 0) empty.classList.remove('hidden'); else {
+            
+            // 過濾：只顯示「候補中(waiting)」且「未過期」的資料
+            const activeWaitlist = waitlistData.filter(item => {
+                const isWaiting = item.status === 'waiting';
+                const isNotExpired = !(item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today);
+                return isWaiting && isNotExpired;
+            });
+
+            if (activeWaitlist.length === 0) {
+                empty.classList.remove('hidden');
+            } else {
                 empty.classList.add('hidden');
                 activeWaitlist.forEach((item, idx) => {
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-orange-50 transition-colors";
                     const phoneMasked = item.phone.slice(0, 2) + "****" + item.phone.slice(-3);
+                    
+                    let futureApptDisplay = '<span class="text-stone-300 text-xs">-</span>';
+                    if (item.hasFutureAppt === 'yes' && item.futureApptDate) {
+                        futureApptDisplay = `<div class="text-xs text-stone-600 font-bold">${item.futureApptDate}</div>`;
+                        if (item.futureApptDoctor) {
+                            futureApptDisplay += `<div class="text-[10px] text-stone-400">${item.futureApptDoctor}</div>`;
+                        }
+                    }
+
                     tr.innerHTML = `
                         <td class="p-4 text-center border-b font-bold text-stone-300">${idx + 1}</td>
                         <td class="p-4 border-b text-xs text-stone-500 font-medium">${item.timestamp}</td>
@@ -629,6 +649,7 @@
                         <td class="p-4 border-b text-sm text-stone-500 font-mono">${phoneMasked}</td>
                         <td class="p-4 border-b font-bold text-stone-700">${mask(item.petName)}</td>
                         <td class="p-4 border-b text-xs leading-relaxed font-medium text-stone-600">${(item.selectedSchedule || []).join('<br>')}</td>
+                        <td class="p-4 border-b">${futureApptDisplay}</td>
                         <td class="p-4 border-b text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 text-orange-700 uppercase tracking-tighter">Waiting</span></td>
                         <td class="p-4 border-b text-center">
                             <div class="flex flex-col gap-1">
@@ -647,10 +668,13 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             const today = new Date().toLocaleDateString('en-CA');
+            
+            // 後台保留「所有」歷史紀錄，並標註狀態
             waitlistData.forEach(item => {
                 const tr = document.createElement('tr');
                 const isDone = item.status === 'done';
                 const isExpired = item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today;
+                
                 tr.className = (isDone || isExpired) ? "opacity-40 grayscale bg-stone-50" : "hover:bg-stone-50 transition-colors";
                 tr.innerHTML = `
                     <td class="p-4 border-b text-xs text-stone-500">${item.timestamp}</td>
@@ -658,7 +682,7 @@
                     <td class="p-4 border-b text-xs font-medium"><strong>${item.petName}</strong> (${item.species})<br>${item.breed}</td>
                     <td class="p-4 border-b text-xs font-medium">
                         <span class="text-orange-600 font-bold">${(item.selectedSchedule || []).join(', ')}</span>
-                        ${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">預約：${item.futureApptDate}</div>` : ''}
+                        ${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">原預約：${item.futureApptDate} (${item.futureApptDoctor})</div>` : ''}
                     </td>
                     <td class="p-4 border-b text-center">
                         <span class="px-2 py-1 rounded-full text-xs font-bold ${isDone ? 'bg-teal-100 text-teal-700' : (isExpired ? 'bg-stone-200 text-stone-600' : 'bg-orange-100 text-orange-700')}">
@@ -675,30 +699,49 @@
             });
         };
 
-        window.toggleDone = async (id, status) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status });
-        window.adminDelete = async (id) => { if (confirm('確定要永久刪除此筆資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
+        window.toggleDone = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status }); };
+        window.adminDelete = async (id) => { if (confirm('確定要從候補名單中永久刪除此筆資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
 
         // --- 更新時段邏輯 ---
         window.promptSelfUpdate = (id) => {
             const item = waitlistData.find(i => i.id === id);
-            showModal('身分驗證', `毛孩【${mask(item.petName)}】變更時段，請輸入當初設定的「自訂密碼」：`, pwd => { if (pwd === item.cancelPassword) openUpdateModal(item); else showModal('驗證失敗', '密碼不正確。'); }, true);
+            showModal('身分驗證', `毛孩【${mask(item.petName)}】您好，更新候補時段請輸入當初登記的「自訂密碼」：`, (pwd) => {
+                if (pwd === item.cancelPassword) {
+                    openUpdateModal(item);
+                } else {
+                    showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。');
+                }
+            }, true);
         };
 
         function openUpdateModal(item) {
             const container = document.getElementById('update-slots-container');
-            document.getElementById('update-modal-info').textContent = `毛孩：${item.petName} | 家屬：${item.ownerName}`;
+            const infoText = document.getElementById('update-modal-info');
+            infoText.textContent = `毛孩：${item.petName} | 家屬：${item.ownerName}`;
             container.innerHTML = '';
+            
             scheduleSettings.slots.forEach(slot => {
                 const isChecked = (item.selectedSchedule || []).includes(slot) ? 'checked' : '';
                 const div = document.createElement('div');
-                div.innerHTML = `<label class="flex items-center gap-4 p-5 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="updateSlot" value="${slot}" ${isChecked} class="w-6 h-6 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-lg font-bold text-stone-700 leading-tight">${slot}</span></label>`;
+                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="updateSlot" value="${slot}" ${isChecked} class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-xs font-bold text-stone-700 leading-tight">${slot}</span></label>`;
                 container.appendChild(div);
             });
+
             document.getElementById('update-modal-btn-save').onclick = async () => {
                 const selected = Array.from(document.querySelectorAll('input[name="updateSlot"]:checked')).map(el => el.value);
-                if (selected.length === 0) return alert('請至少勾選一個時段。');
-                try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', item.id), { selectedSchedule: selected }); hideUpdateModal(); showModal('更新成功', '您的時段已重新同步。'); } catch(e) { alert('更新失敗。'); }
+                if (selected.length === 0) {
+                    alert('請至少勾選一個候補時段，或直接選擇取消登記。');
+                    return;
+                }
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', item.id), { selectedSchedule: selected });
+                    hideUpdateModal();
+                    showModal('更新成功', '您的候補時段已重新同步至醫院。');
+                } catch(e) {
+                    alert('更新失敗，請檢查網路連線。');
+                }
             };
+
             const modal = document.getElementById('update-modal');
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); modal.children[0].classList.remove('scale-95'); }, 10);
@@ -713,8 +756,10 @@
         window.handleRegisterSubmit = async (e) => {
             e.preventDefault();
             const selectedSchedule = Array.from(document.querySelectorAll('input[name="scheduleSlot"]:checked')).map(el => el.value);
-            if (selectedSchedule.length === 0) return showModal('提醒', '請勾選候補時段。');
+            if (selectedSchedule.length === 0) { showModal('提醒', '請至少勾選一個可候補時段。'); return; }
+            
             const hasFutureAppt = document.querySelector('input[name="hasFutureAppt"]:checked').value;
+            
             const data = {
                 createdAt: Date.now(),
                 timestamp: new Date().toLocaleString('zh-TW', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
@@ -730,32 +775,64 @@
                 weight: document.getElementById('weight').value,
                 selectedSchedule,
                 reasons: Array.from(document.querySelectorAll('input[name="visitReason"]:checked')).map(el => el.value),
-                hasFutureAppt,
+                hasFutureAppt: hasFutureAppt,
                 futureApptDate: hasFutureAppt === 'yes' ? document.getElementById('futureApptDate').value : null,
                 futureApptDoctor: hasFutureAppt === 'yes' ? document.getElementById('futureApptDoctor').value : null,
                 cancelPassword: document.getElementById('cancelPassword').value,
                 status: 'waiting'
             };
-            try { await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'waitlist'), data); showModal('登記完成', '您的候補申請已同步。', () => switchMode('visitor')); e.target.reset(); } catch(err) { showModal('錯誤', '資料送出失敗。'); }
+            
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'waitlist'), data);
+                showModal('登記完成', '您的候補申請已同步至醫院雲端。若有空檔釋出，櫃檯將優先以此名單連繫，請保持電話暢通。', () => switchMode('visitor'));
+                e.target.reset();
+            } catch(err) {
+                showModal('錯誤', '資料送出失敗，請檢查網路連線。');
+            }
         };
 
         window.promptSelfCancel = (id) => {
             const item = waitlistData.find(i => i.id === id);
-            showModal('取消身份驗證', `確定要取消毛孩【${mask(item.petName)}】的候補嗎？\n請輸入自訂密碼：`, async pwd => { if (pwd === item.cancelPassword) { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); showModal('已移除', '取消成功！'); } else showModal('驗證失敗', '密碼不正確。'); }, true);
+            showModal('取消身份驗證', `確定要取消毛孩【${mask(item.petName)}】的候補登記嗎？\n請輸入登記時設定的「自訂密碼」：`, async (pwd) => {
+                if (pwd === item.cancelPassword) { 
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); 
+                    showModal('取消成功', '已從候補系統中移除您的資料，感謝您的配合！'); 
+                }
+                else showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。');
+            }, true);
         };
 
+        // --- 核心導覽與 UI 輔助 ---
         window.switchMode = (mode) => {
             document.getElementById('sec-visitor').classList.toggle('hidden-section', mode !== 'visitor');
             document.getElementById('sec-register').classList.toggle('hidden-section', mode !== 'register');
             document.getElementById('sec-admin').classList.toggle('hidden-section', mode !== 'admin');
+            
             document.getElementById('btn-visitor').className = mode === 'visitor' ? 'px-5 py-2.5 rounded-full font-bold bg-orange-500 text-white shadow-md transition-all' : 'px-5 py-2.5 rounded-full font-bold text-stone-500 hover:bg-stone-100 transition-all';
             document.getElementById('btn-register').className = mode === 'register' ? 'px-5 py-2.5 rounded-full font-bold bg-orange-500 text-white shadow-md transition-all' : 'px-5 py-2.5 rounded-full font-bold text-stone-500 hover:bg-stone-100 transition-all';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         window.promptLogin = (target) => {
-            if (target === 'register') showModal('登記權限驗證', '請輸入櫃檯提供的「登記密碼」以解鎖表單：', pwd => { if (pwd === (scheduleSettings.registerPassword || '3050')) switchMode('register'); else showModal('錯誤', '密碼不正確。'); }, true, () => switchMode('visitor'));
-            else if (target === 'admin') showModal('管理端登入', '請輸入管理員密碼：', pwd => { if (pwd === 'gaze250305') switchMode('admin'); else showModal('錯誤', '密碼不正確。'); }, true, () => switchMode('visitor'));
+            if (target === 'register') {
+                showModal('登記權限驗證', '請輸入櫃檯提供的「登記密碼」以解鎖表單：', 
+                    (pwd) => { 
+                        if (pwd === (scheduleSettings.registerPassword || '3050')) switchMode('register'); 
+                        else showModal('錯誤', '登記密碼不正確。'); 
+                    }, 
+                    true,
+                    () => { switchMode('visitor'); } // 點擊取消導回首頁
+                );
+            } else if (target === 'admin') {
+                showModal('管理端登入', '請輸入管理員密碼：', 
+                    (pwd) => { 
+                        if (pwd === 'gaze250305') switchMode('admin'); 
+                        else showModal('錯誤', '管理密碼不正確。'); 
+                    }, 
+                    true,
+                    () => { switchMode('visitor'); } // 點擊取消導回首頁
+                );
+            }
         };
 
         window.showModal = (title, message, onConfirm, requireInput, onCancel = null) => {
@@ -763,14 +840,35 @@
             document.getElementById('modal-message').textContent = message;
             document.getElementById('modal-input-container').classList.toggle('hidden', !requireInput);
             document.getElementById('modal-input').value = '';
-            document.getElementById('modal-btn-confirm').onclick = () => { const val = document.getElementById('modal-input').value; if (requireInput && !val) return; hideModal(); if (onConfirm) onConfirm(val); };
+            
+            // 確認按鈕處理
+            document.getElementById('modal-btn-confirm').onclick = () => { 
+                const val = document.getElementById('modal-input').value; 
+                if (requireInput && !val) return;
+                hideModal(); 
+                if (onConfirm) onConfirm(val); 
+            };
+            
+            // 取消按鈕處理
             const cancelBtn = document.getElementById('modal-btn-cancel');
             cancelBtn.classList.toggle('hidden', !requireInput);
-            cancelBtn.onclick = () => { hideModal(); if (onCancel) onCancel(); };
+            cancelBtn.onclick = () => {
+                hideModal();
+                if (onCancel) onCancel(); 
+            };
+
             document.getElementById('custom-modal').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('custom-modal').classList.remove('opacity-0'); document.getElementById('modal-content-box').classList.remove('scale-95'); if (requireInput) document.getElementById('modal-input').focus(); }, 10);
+            setTimeout(() => { 
+                document.getElementById('custom-modal').classList.remove('opacity-0'); 
+                document.getElementById('modal-content-box').classList.remove('scale-95'); 
+                if (requireInput) document.getElementById('modal-input').focus(); 
+            }, 10);
         };
-        window.hideModal = () => { document.getElementById('custom-modal').classList.add('opacity-0'); document.getElementById('modal-content-box').classList.add('scale-95'); setTimeout(() => document.getElementById('custom-modal').classList.add('hidden'), 300); };
+        
+        window.hideModal = () => {
+            document.getElementById('custom-modal').classList.add('opacity-0'); document.getElementById('modal-content-box').classList.add('scale-95');
+            setTimeout(() => document.getElementById('custom-modal').classList.add('hidden'), 300);
+        };
     </script>
 </body>
 </html>
