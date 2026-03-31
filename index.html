@@ -266,7 +266,7 @@
     <!-- Modals -->
     <div id="custom-modal" class="fixed inset-0 bg-stone-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-md transform scale-95 transition-transform duration-300" id="modal-content-box">
-            <h3 id="modal-title" class="text-2xl font-bold mb-4 text-stone-800">提示</h3>
+            <h3 id="modal-title" class="text-2xl font-bold mb-4 text-orange-600">提示</h3>
             <p id="modal-message" class="text-stone-600 mb-8 leading-relaxed whitespace-pre-line font-medium"></p>
             <div id="modal-input-container" class="hidden mb-8">
                 <input type="password" id="modal-input" class="w-full p-4 border-2 border-stone-100 rounded-xl focus:border-orange-400 outline-none font-mono text-2xl shadow-inner bg-stone-50 text-center">
@@ -346,7 +346,7 @@
                             "週五下午 - 詹益萍", "週五下午 - 楊崇君",
                             "週日上午 - 楊崇君", "週日下午 - 楊崇君"
                         ], 
-                        note: "【門診異動通知】楊崇君醫師將於 4/11 至 5/10 期間暫停門診服務。\n\n【溫馨提醒】登記完成後請熟記密碼。若已在他院診療，請自行手動取消或致電櫃檯，保留資源給需要的毛孩。\n\n【運作須知】本系統協助提前看診。若原預約日前無人取消，櫃檯將不致電詢問；若超過預約日，該筆候補將自動失效。", 
+                        note: "1. 醫師休診公告\n\n【門診異動通知】楊崇君醫師將於 4/11 至 5/10 期間暫停門診服務。若有相關看診需求，建議您提前安排或致電櫃檯洽詢，造成不便敬請見諒。\n\n2. 登記與取消提醒\n\n【溫馨提醒：候補資源共享】登記完成後，請務必熟記您所設定的「自訂取消密碼」。若等候期間您的寶貝已於他院完成診療，請利用該密碼回到本網頁手動取消候補，或直接致電櫃檯由人員協助處理。\n\n3. 候補失效與電話通知說明\n\n【候補系統運作須知】本系統協助您嘗試「提前」看診。若直到您的「原預約時段」前皆無名額釋出，櫃檯將不主動致電詢問；一旦時間超過您的原預約日期，該筆候補登記將自動失效。", 
                         registerPassword: "3050" 
                     };
                     setDoc(settingsRef, scheduleSettings);
@@ -416,7 +416,7 @@
                 (scheduleSettings.slots || []).forEach((s, idx) => {
                     const div = document.createElement('div');
                     div.id = `slot-row-${idx}`; div.className = "flex gap-2";
-                    div.innerHTML = `<input type="text" value="${s}" class="slot-val-input flex-grow p-2 border border-stone-600 rounded bg-stone-800 text-white font-medium focus:border-amber-500 outline-none"><button onclick="document.getElementById('slot-row-${idx}').remove()" class="text-red-400 px-3 font-bold hover:text-red-300 transition-colors">✕</button>`;
+                    div.innerHTML = `<input type="text" value="${s}" class="slot-val-input flex-grow p-2 border border-stone-600 rounded bg-stone-800 text-white font-medium focus:border-amber-500 outline-none"><button onclick="document.getElementById('slot-row-${idx}').remove()" class="text-red-400 px-3 font-bold hover:text-red-300">✕</button>`;
                     adminInputs.appendChild(div);
                 });
             }
@@ -431,7 +431,7 @@
             const idx = Date.now();
             const div = document.createElement('div');
             div.id = `slot-row-${idx}`; div.className = "flex gap-2";
-            div.innerHTML = `<input type="text" class="slot-val-input flex-grow p-2 border border-stone-600 rounded bg-stone-800 text-white font-medium focus:border-amber-500 outline-none"><button onclick="document.getElementById('slot-row-${idx}').remove()" class="text-red-400 px-3 font-bold hover:text-red-300 transition-colors">✕</button>`;
+            div.innerHTML = `<input type="text" class="slot-val-input flex-grow p-2 border border-stone-600 rounded bg-stone-800 text-white font-medium focus:border-amber-500 outline-none"><button onclick="document.getElementById('slot-row-${idx}').remove()" class="text-red-400 px-3 font-bold hover:text-red-300">✕</button>`;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         };
@@ -522,7 +522,7 @@
                 tr.innerHTML = `
                     <td class="p-4 border-b text-xs text-stone-500">${item.timestamp}</td>
                     <td class="p-4 border-b"><strong>${item.ownerName}</strong><br><span class="text-xs text-stone-500 font-mono">${item.phone}</span></td>
-                    <td class="p-4 border-b text-xs font-medium"><strong>${item.petName}</strong> (${item.species})<br>${item.breed}</td>
+                    <td class="p-4 border-b text-xs"><strong>${item.petName}</strong> (${item.species})<br>${item.breed}</td>
                     <td class="p-4 border-b text-xs font-medium">
                         <span class="text-orange-600 font-bold">${(item.selectedSchedule || []).join(', ')}</span>
                         ${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">原預約：${item.futureApptDate} (${item.futureApptDoctor})</div>` : ''}
@@ -641,12 +641,12 @@
                 if (onConfirm) onConfirm(val); 
             };
             
-            // 取消按鈕處理 (修正點)
+            // 取消按鈕處理
             const cancelBtn = document.getElementById('modal-btn-cancel');
             cancelBtn.classList.toggle('hidden', !requireInput);
             cancelBtn.onclick = () => {
                 hideModal();
-                if (onCancel) onCancel(); // 執行取消後的回調 (如切換回首頁)
+                if (onCancel) onCancel(); 
             };
 
             document.getElementById('custom-modal').classList.remove('hidden');
