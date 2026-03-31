@@ -420,19 +420,24 @@
         };
 
         window.renderScheduleElements = () => {
-            const container = document.getElementById('scheduleSlotsContainer');
-            container.innerHTML = '';
-            (scheduleSettings.slots || []).forEach(slot => {
-                const div = document.createElement('div');
-                div.innerHTML = `<label class="flex items-center gap-3 p-4 border border-stone-100 rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="scheduleSlot" value="${slot}" class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-sm font-bold text-stone-700">${slot}</span></label>`;
-                container.appendChild(div);
-            });
+            const sortedSlots = scheduleSettings.slots || [];
+
+            // 1. 更新家屬登記頁面的 Checkboxes (嚴格遵循排序)
+            const regContainer = document.getElementById('scheduleSlotsContainer');
+            if (regContainer) {
+                regContainer.innerHTML = '';
+                sortedSlots.forEach(slot => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<label class="flex items-center gap-3 p-4 border border-stone-100 rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm focus-within:ring-2 focus-within:ring-orange-200"><input type="checkbox" name="scheduleSlot" value="${slot}" class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-sm font-bold text-stone-700">${slot}</span></label>`;
+                    regContainer.appendChild(div);
+                });
+            }
             
-            // 管理後台列表與拖曳功能
+            // 2. 更新管理後台的 Input Rows
             const adminInputs = document.getElementById('admin-schedule-inputs');
             if (adminInputs) {
                 adminInputs.innerHTML = '';
-                (scheduleSettings.slots || []).forEach((s, idx) => {
+                sortedSlots.forEach((s, idx) => {
                     const row = createAdminSlotRow(s, idx);
                     adminInputs.appendChild(row);
                 });
@@ -460,26 +465,38 @@
         }
 
         function setupDragAndDrop(container) {
-            container.addEventListener('dragstart', e => {
-                const row = e.target.closest('.drag-row');
-                if (row) row.classList.add('dragging');
-            });
+            // 清除現有監聽器避免重複綁定 (雖然 innerHTML 已清空，但為求保險)
+            container.removeEventListener('dragstart', handleDragStart);
+            container.removeEventListener('dragend', handleDragEnd);
+            container.removeEventListener('dragover', handleDragOver);
 
-            container.addEventListener('dragend', e => {
-                const row = e.target.closest('.drag-row');
-                if (row) row.classList.remove('dragging');
-            });
+            container.addEventListener('dragstart', handleDragStart);
+            container.addEventListener('dragend', handleDragEnd);
+            container.addEventListener('dragover', handleDragOver);
+        }
 
-            container.addEventListener('dragover', e => {
-                e.preventDefault();
-                const afterElement = getDragAfterElement(container, e.clientY);
-                const dragging = document.querySelector('.dragging');
+        function handleDragStart(e) {
+            const row = e.target.closest('.drag-row');
+            if (row) row.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            const row = e.target.closest('.drag-row');
+            if (row) row.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const container = e.currentTarget;
+            const afterElement = getDragAfterElement(container, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            if (dragging) {
                 if (afterElement == null) {
                     container.appendChild(dragging);
                 } else {
                     container.insertBefore(dragging, afterElement);
                 }
-            });
+            }
         }
 
         function getDragAfterElement(container, y) {
@@ -503,14 +520,17 @@
         };
 
         window.saveAdminSettings = async () => {
-            const newSlots = Array.from(document.querySelectorAll('.slot-val-input')).map(i => i.value).filter(v => v.trim());
+            const adminInputs = document.getElementById('admin-schedule-inputs');
+            // 嚴格按照 DOM 排序抓取資料
+            const newSlots = Array.from(adminInputs.querySelectorAll('.slot-val-input')).map(i => i.value).filter(v => v.trim());
+            
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config'), {
                     slots: newSlots,
                     note: document.getElementById('admin-schedule-note').value,
                     registerPassword: document.getElementById('admin-register-password').value
                 });
-                showModal('已更新', '班表與系統公告設定已成功同步至雲端伺服器。');
+                showModal('已更新', '班表與系統公告設定已成功同步至雲端伺服器，前台排序已更新。');
             } catch(e) { showModal('儲存失敗', '請檢查網路連線。'); }
         };
 
