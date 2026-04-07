@@ -58,8 +58,8 @@
                 凝視犬貓專科醫院 <span class="text-stone-300 font-light px-1">|</span> <span class="text-stone-700">心臟科候補系統</span>
             </div>
             <div class="flex gap-3">
-                <button onclick="switchMode('visitor')" id="btn-visitor" class="px-5 py-2.5 rounded-full font-bold transition-all duration-300">瀏覽候補名單</button>
-                <button onclick="promptLogin('register')" id="btn-register" class="px-5 py-2.5 rounded-full font-bold transition-all duration-300 text-stone-500 hover:bg-stone-100">點選這裡登記候補</button>
+                <button onclick="window.switchMode('visitor')" id="btn-visitor" class="px-5 py-2.5 rounded-full font-bold transition-all duration-300">瀏覽候補名單</button>
+                <button onclick="window.promptLogin('register')" id="btn-register" class="px-5 py-2.5 rounded-full font-bold transition-all duration-300 text-stone-500 hover:bg-stone-100">點選這裡登記候補</button>
             </div>
         </div>
     </header>
@@ -121,7 +121,7 @@
             <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-8 md:p-12">
                 <h2 class="text-3xl font-bold text-orange-600 border-l-4 border-amber-400 pl-4 mb-8 tracking-wide">新增候補登記</h2>
                 
-                <form id="waitlist-form" onsubmit="handleRegisterSubmit(event)">
+                <form id="waitlist-form" onsubmit="window.handleRegisterSubmit(event)">
                     <!-- 基本資料區 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-5 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
                         <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">1</span>
@@ -200,7 +200,7 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10" id="scheduleSlotsContainer"></div>
 
-                    <!-- 交通與準備時間評估區 (NEW) -->
+                    <!-- 交通與準備時間評估區 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-4 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
                         <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">3</span>
                         交通與準備時間評估
@@ -306,8 +306,8 @@
                     <div class="mb-10 ml-2">
                         <p class="text-sm text-stone-600 font-bold mb-3">請問您是否已先致電預約過本院較後面的時段？</p>
                         <div class="flex gap-6 mb-4">
-                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700"><input type="radio" name="hasFutureAppt" value="yes" onchange="toggleFutureApptFields()" class="w-5 h-5 text-orange-500 focus:ring-orange-500 border-stone-300"> 是，已有預約</label>
-                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700"><input type="radio" name="hasFutureAppt" value="no" checked onchange="toggleFutureApptFields()" class="w-5 h-5 text-orange-500 focus:ring-orange-500 border-stone-300"> 否，尚未預約</label>
+                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700"><input type="radio" name="hasFutureAppt" value="yes" onchange="window.toggleFutureApptFields()" class="w-5 h-5 text-orange-500 focus:ring-orange-500 border-stone-300"> 是，已有預約</label>
+                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700"><input type="radio" name="hasFutureAppt" value="no" checked onchange="window.toggleFutureApptFields()" class="w-5 h-5 text-orange-500 focus:ring-orange-500 border-stone-300"> 否，尚未預約</label>
                         </div>
                         <div id="futureApptFields" class="hidden bg-stone-50 border border-stone-200 p-5 rounded-2xl mt-4 shadow-inner">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -342,7 +342,7 @@
                 <h2 class="text-2xl font-bold text-amber-400 border-l-4 border-amber-400 pl-4 mb-6 tracking-wide uppercase">系統班表與公告設定</h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-stone-900/50 p-6 rounded-2xl border border-stone-700">
-                        <h3 class="text-lg font-bold text-stone-200 mb-4 flex justify-between items-center">門診時段選項 (拖曳可排序) <button onclick="addScheduleSlotInput()" class="text-xs bg-amber-500 text-stone-900 px-3 py-1.5 rounded-lg font-bold hover:bg-amber-400 transition-colors">＋新增一列</button></h3>
+                        <h3 class="text-lg font-bold text-stone-200 mb-4 flex justify-between items-center">門診時段選項 (拖曳可排序) <button onclick="window.addScheduleSlotInput()" class="text-xs bg-amber-500 text-stone-900 px-3 py-1.5 rounded-lg font-bold hover:bg-amber-400 transition-colors">＋新增一列</button></h3>
                         <div id="admin-schedule-inputs" class="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar"></div>
                     </div>
                     <div class="bg-stone-900/50 p-6 rounded-2xl border border-stone-700">
@@ -350,7 +350,7 @@
                         <div><h3 class="text-lg font-bold text-stone-200 mb-3">前台公告編輯</h3><textarea id="admin-schedule-note" class="w-full p-4 border border-stone-600 rounded-xl bg-stone-800 text-white resize-none min-h-[120px] custom-scrollbar leading-relaxed"></textarea></div>
                     </div>
                 </div>
-                <div class="mt-8 text-right"><button onclick="saveAdminSettings()" class="bg-teal-500 hover:bg-teal-400 text-stone-900 font-bold text-lg py-3 px-10 rounded-xl shadow-lg transition-all">儲存系統設定</button></div>
+                <div class="mt-8 text-right"><button onclick="window.saveAdminSettings()" class="bg-teal-500 hover:bg-teal-400 text-stone-900 font-bold text-lg py-3 px-10 rounded-xl shadow-lg transition-all">儲存系統設定</button></div>
             </div>
 
             <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-8 md:p-10 mb-8">
@@ -362,7 +362,7 @@
 
     <footer class="text-stone-400 text-center py-8 text-sm mt-auto relative font-medium">
         <p>© 2026 凝視犬貓專科醫院 Gaze Veterinary Cardiology. All Rights Reserved.</p>
-        <button onclick="promptLogin('admin')" class="absolute bottom-4 right-4 text-transparent hover:text-stone-300 text-xs cursor-default transition-colors">管理員登入</button>
+        <button onclick="window.promptLogin('admin')" class="absolute bottom-4 right-4 text-transparent hover:text-stone-300 text-xs cursor-default transition-colors">管理員登入</button>
     </footer>
 
     <!-- Update Modal (更新時段專用) -->
@@ -374,7 +374,7 @@
                 <!-- 動態注入時段選項 -->
             </div>
             <div class="flex justify-end gap-3 border-t pt-6">
-                <button onclick="hideUpdateModal()" class="px-5 py-2 bg-stone-100 rounded-xl font-bold text-stone-500">取消變更</button>
+                <button onclick="window.hideUpdateModal()" class="px-5 py-2 bg-stone-100 rounded-xl font-bold text-stone-500">取消變更</button>
                 <button id="update-modal-btn-save" class="px-8 py-2 text-white bg-orange-500 rounded-xl font-bold shadow-md shadow-orange-200">儲存更新</button>
             </div>
         </div>
@@ -452,7 +452,7 @@
                     setTimeout(() => initAuthWithRetry(retryCount + 1), 2000);
                 } else {
                     document.getElementById('app-body').classList.remove('is-loading');
-                    showModal('連線暫時中斷', '目前無法連接雲端伺服器。這通常是 Google 系統設定更新後的延遲（約需 5-10 分鐘），請稍候再試。');
+                    window.showModal('連線暫時中斷', '目前無法連接雲端伺服器。這通常是 Google 系統設定更新後的延遲（約需 5-10 分鐘），請稍候再試。');
                 }
             }
         }
@@ -512,7 +512,7 @@
             const container = document.getElementById('reasonsContainer');
             reasons.forEach(r => {
                 const div = document.createElement('div');
-                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="visitReason" value="${r}" onchange="checkReasonWarnings()" class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-lg font-bold text-stone-700">${r}</span></label>`;
+                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="visitReason" value="${r}" onchange="window.checkReasonWarnings()" class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-lg font-bold text-stone-700">${r}</span></label>`;
                 container.appendChild(div);
             });
         };
@@ -644,8 +644,8 @@
                     note: document.getElementById('admin-schedule-note').value,
                     registerPassword: document.getElementById('admin-register-password').value
                 });
-                showModal('已更新', '班表與系統公告設定已成功同步至雲端伺服器，前台排序已更新。');
-            } catch(e) { showModal('儲存失敗', '請檢查網路連線。'); }
+                window.showModal('已更新', '班表與系統公告設定已成功同步至雲端伺服器，前台排序已更新。');
+            } catch(e) { window.showModal('儲存失敗', '請檢查網路連線。'); }
         };
 
         // --- 表格渲染與自動隱藏邏輯 ---
@@ -697,8 +697,8 @@
                         <td class="p-4 border-b text-center"><span class="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 text-orange-700 uppercase tracking-tighter">Waiting</span></td>
                         <td class="p-4 border-b text-center">
                             <div class="flex flex-col gap-1">
-                                <button onclick="promptSelfUpdate('${item.id}')" class="text-[10px] text-teal-600 hover:underline font-bold transition-colors">更新時段</button>
-                                <button onclick="promptSelfCancel('${item.id}')" class="text-[10px] text-stone-400 hover:text-red-500 underline font-bold transition-colors mt-1">取消候補</button>
+                                <button onclick="window.promptSelfUpdate('${item.id}')" class="text-[10px] text-teal-600 hover:underline font-bold transition-colors">更新時段</button>
+                                <button onclick="window.promptSelfCancel('${item.id}')" class="text-[10px] text-stone-400 hover:text-red-500 underline font-bold transition-colors">取消候補</button>
                             </div>
                         </td>
                     `;
@@ -717,7 +717,7 @@
             waitlistData.forEach(item => {
                 const tr = document.createElement('tr');
                 const isDone = item.status === 'done';
-                const isCanceled = item.status === 'canceled'; // 新增：判斷是否為已取消
+                const isCanceled = item.status === 'canceled'; 
                 const isExpired = item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today && !isDone && !isCanceled;
                 
                 tr.className = (isDone || isExpired || isCanceled) ? "opacity-40 grayscale bg-stone-50" : "hover:bg-stone-50 transition-colors";
@@ -730,9 +730,9 @@
                 else if (isExpired) { badgeClass = 'bg-stone-200 text-stone-600'; badgeText = '已過期'; }
 
                 // 動態設定操作按鈕（若是完成或取消，則改為還原按鈕）
-                let actionBtn = `<button onclick="toggleStatus('${item.id}', 'done')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">完成</button>`;
+                let actionBtn = `<button onclick="window.toggleStatus('${item.id}', 'done')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">完成</button>`;
                 if (isDone || isCanceled) {
-                    actionBtn = `<button onclick="toggleStatus('${item.id}', 'waiting')" class="text-xs bg-stone-500 hover:bg-stone-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">還原</button>`;
+                    actionBtn = `<button onclick="window.toggleStatus('${item.id}', 'waiting')" class="text-xs bg-stone-500 hover:bg-stone-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">還原</button>`;
                 }
 
                 tr.innerHTML = `
@@ -741,6 +741,7 @@
                     <td class="p-4 border-b text-xs font-medium"><strong>${item.petName}</strong> (${item.species})<br>${item.breed}</td>
                     <td class="p-4 border-b text-xs font-medium">
                         <span class="text-orange-600 font-bold">${(item.selectedSchedule || []).join(', ')}</span>
+                        <br><span class="text-teal-700 bg-teal-50 px-1 rounded mt-1 inline-block border border-teal-100">通知緩衝：至少 ${item.travelTime || '?'} 小時</span>
                         ${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">原預約：${item.futureApptDate} (${item.futureApptDoctor})</div>` : ''}
                     </td>
                     <td class="p-4 border-b text-center">
@@ -751,7 +752,7 @@
                     </td>
                     <td class="p-4 border-b text-center whitespace-nowrap">
                         ${actionBtn}
-                        <button onclick="adminDelete('${item.id}')" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg ml-1 shadow-sm font-bold transition-colors">刪除</button>
+                        <button onclick="window.adminDelete('${item.id}')" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg ml-1 shadow-sm font-bold transition-colors">刪除</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -761,10 +762,65 @@
         window.toggleStatus = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status }); };
         window.adminDelete = async (id) => { if (confirm('確定要從雲端永久刪除此筆候補資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
 
+        // --- 復原：更新時段邏輯 ---
+        window.promptSelfUpdate = (id) => {
+            const item = waitlistData.find(i => i.id === id);
+            window.showModal('身分驗證', `毛孩【${mask(item.petName)}】您好，更新候補時段請輸入當初登記的「自訂密碼」：`, (pwd) => {
+                if (pwd === item.cancelPassword) {
+                    window.hideModal(); 
+                    setTimeout(() => window.openUpdateModal(item), 350);
+                } else {
+                    window.showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。');
+                }
+            }, true);
+        };
+
+        window.openUpdateModal = (item) => {
+            const container = document.getElementById('update-slots-container');
+            const infoText = document.getElementById('update-modal-info');
+            infoText.textContent = `毛孩：${item.petName} | 家屬：${item.ownerName}`;
+            container.innerHTML = '';
+            
+            scheduleSettings.slots.forEach(slot => {
+                const isChecked = (item.selectedSchedule || []).includes(slot) ? 'checked' : '';
+                const div = document.createElement('div');
+                div.innerHTML = `<label class="flex items-center gap-4 p-5 border border-stone-100 rounded-2xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm focus-within:ring-2 focus-within:ring-orange-200"><input type="checkbox" name="updateSlot" value="${slot}" ${isChecked} class="w-6 h-6 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-xl font-bold text-stone-700 leading-tight">${slot}</span></label>`;
+                container.appendChild(div);
+            });
+
+            document.getElementById('update-modal-btn-save').onclick = async () => {
+                const selected = Array.from(document.querySelectorAll('input[name="updateSlot"]:checked')).map(el => el.value);
+                if (selected.length === 0) {
+                    alert('請至少勾選一個候補時段，或直接關閉視窗選擇取消候補。');
+                    return;
+                }
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', item.id), { selectedSchedule: selected });
+                    window.hideUpdateModal();
+                    setTimeout(() => window.showModal('更新成功', '您的候補時段已重新同步至醫院。'), 350);
+                } catch(e) {
+                    alert('更新失敗，請檢查網路連線。');
+                }
+            };
+
+            const modal = document.getElementById('update-modal');
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; // Force reflow
+            modal.classList.remove('opacity-0');
+            modal.children[0].classList.remove('scale-95');
+        }
+
+        window.hideUpdateModal = () => {
+            const modal = document.getElementById('update-modal');
+            modal.classList.add('opacity-0'); 
+            modal.children[0].classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
         window.handleRegisterSubmit = async (e) => {
             e.preventDefault();
             const selectedSchedule = Array.from(document.querySelectorAll('input[name="scheduleSlot"]:checked')).map(el => el.value);
-            if (selectedSchedule.length === 0) { showModal('提醒', '請至少勾選一個可候補時段。'); return; }
+            if (selectedSchedule.length === 0) { window.showModal('提醒', '請至少勾選一個可候補時段。'); return; }
             
             const hasFutureAppt = document.querySelector('input[name="hasFutureAppt"]:checked').value;
             
@@ -793,32 +849,28 @@
             
             try {
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'waitlist'), data);
-                showModal('登記完成', '您的候補申請已同步至醫院雲端。若有空檔釋出，櫃檯將優先以此名單連繫，請保持電話暢通。', () => switchMode('visitor'));
+                window.showModal('登記完成', '您的候補申請已同步至醫院雲端。若有空檔釋出，櫃檯將優先以此名單連繫，請保持電話暢通。', () => { window.hideModal(); window.switchMode('visitor'); });
                 e.target.reset();
             } catch(err) {
-                showModal('錯誤', '資料送出失敗，請檢查網路連線。');
+                window.showModal('錯誤', '資料送出失敗，請檢查網路連線。');
             }
         };
 
         window.promptSelfCancel = (id) => {
             const item = waitlistData.find(i => i.id === id);
-            // 直接在密碼輸入框顯示提醒文字
             const msg = `確定要取消毛孩【${mask(item.petName)}】的候補登記嗎？\n\n⚠️ 溫馨提醒：此操作僅限於取消候補名單，若您要取消原本已預約的門診時段，仍需於營業時間致電櫃檯 04-2326-0250 取消。\n\n請輸入自訂密碼：`;
             
-            showModal('取消候補', msg, async (pwd) => {
+            window.showModal('取消候補', msg, async (pwd) => {
                 if (pwd === item.cancelPassword) { 
                     try {
-                        // 【修改點】原本的 deleteDoc 改成 updateDoc (軟刪除)，保留在後台
                         await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status: 'canceled' }); 
-                        setTimeout(() => {
-                            showModal('取消成功', '已從候補系統中移除您的資料，感謝您的配合！\n\n(若有預約原門診，請記得致電 04-2326-0250 取消喔)'); 
-                        }, 350);
+                        window.showModal('取消成功', '已從候補系統中移除您的資料，感謝您的配合！\n\n(若有預約原門診，請記得致電 04-2326-0250 取消喔)'); 
                     } catch(err) {
-                        setTimeout(() => showModal('錯誤', '取消失敗，請檢查網路連線。'), 350);
+                        window.showModal('錯誤', '取消失敗，請檢查網路連線。');
                     }
                 }
                 else {
-                    setTimeout(() => showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。'), 350);
+                    window.showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。');
                 }
             }, true);
         };
@@ -836,32 +888,40 @@
 
         window.promptLogin = (target) => {
             if (target === 'register') {
-                showModal('登記權限驗證', '請輸入櫃檯提供的「登記密碼」以解鎖表單：', 
+                window.showModal('登記權限驗證', '請輸入櫃檯提供的「登記密碼」以解鎖表單：', 
                     (pwd) => { 
-                        if (pwd === (scheduleSettings.registerPassword || '3050')) switchMode('register'); 
-                        else setTimeout(() => showModal('錯誤', '登記密碼不正確。'), 350);
+                        if (pwd === (scheduleSettings.registerPassword || '3050')) {
+                            window.hideModal();
+                            window.switchMode('register');
+                        } else {
+                            window.showModal('錯誤', '登記密碼不正確。');
+                        }
                     }, 
                     true,
-                    () => { switchMode('visitor'); } // 點擊取消導回首頁
+                    () => { window.switchMode('visitor'); } // 點擊取消導回首頁
                 );
             } else if (target === 'admin') {
-                showModal('管理端登入', '請輸入管理員密碼：', 
+                window.showModal('管理端登入', '請輸入管理員密碼：', 
                     (pwd) => { 
-                        if (pwd === 'gaze250305') switchMode('admin'); 
-                        else setTimeout(() => showModal('錯誤', '管理密碼不正確。'), 350); 
+                        if (pwd === 'gaze250305') {
+                            window.hideModal();
+                            window.switchMode('admin'); 
+                        } else {
+                            window.showModal('錯誤', '管理密碼不正確。'); 
+                        }
                     }, 
                     true,
-                    () => { switchMode('visitor'); } // 點擊取消導回首頁
+                    () => { window.switchMode('visitor'); } // 點擊取消導回首頁
                 );
             }
         };
 
-        let modalHideTimeoutId = null;
+        window.modalHideTimeoutId = null;
 
         window.showModal = (title, message, onConfirm, requireInput, onCancel = null) => {
-            if (modalHideTimeoutId) {
-                clearTimeout(modalHideTimeoutId);
-                modalHideTimeoutId = null;
+            if (window.modalHideTimeoutId) {
+                clearTimeout(window.modalHideTimeoutId);
+                window.modalHideTimeoutId = null;
             }
             
             const modal = document.getElementById('custom-modal');
@@ -872,25 +932,45 @@
             document.getElementById('modal-input-container').classList.toggle('hidden', !requireInput);
             document.getElementById('modal-input').value = '';
             
-            // 確認按鈕處理
-            document.getElementById('modal-btn-confirm').onclick = () => { 
+            // 確認按鈕處理 (支援非同步操作)
+            const confirmBtn = document.getElementById('modal-btn-confirm');
+            confirmBtn.onclick = async () => { 
                 const val = document.getElementById('modal-input').value; 
                 if (requireInput && !val) return;
-                hideModal(); 
-                if (onConfirm) onConfirm(val); 
+                
+                const originalText = confirmBtn.textContent;
+                
+                // 若未指定執行後顯示其他 Modal，則我們手動關閉
+                let shouldHide = true; 
+
+                if (onConfirm) {
+                    confirmBtn.textContent = '處理中...';
+                    confirmBtn.disabled = true;
+                    try {
+                        const result = onConfirm(val);
+                        if (result instanceof Promise) await result;
+                        // 若 onConfirm 成功執行且沒有顯示新的 Modal (這很難判斷，所以交由 callback 本身決定或是我們統一先關掉)
+                        // 我們這裡不統一調用 hideModal，讓需要更換畫面的 callback 自己覆蓋，而成功路徑自己呼叫 hideModal。
+                        shouldHide = false; 
+                    } finally {
+                        confirmBtn.textContent = originalText;
+                        confirmBtn.disabled = false;
+                    }
+                } 
+                
+                if (shouldHide) window.hideModal(); 
             };
             
             // 取消按鈕處理
             const cancelBtn = document.getElementById('modal-btn-cancel');
             cancelBtn.classList.toggle('hidden', !requireInput);
             cancelBtn.onclick = () => {
-                hideModal();
+                window.hideModal();
                 if (onCancel) onCancel(); 
             };
 
             // 強制顯示
             modal.classList.remove('hidden');
-            // 強制瀏覽器重新計算佈局，確保 Transition 動畫生效
             void modal.offsetWidth;
             
             modal.classList.remove('opacity-0');
@@ -905,10 +985,10 @@
             modal.classList.add('opacity-0'); 
             contentBox.classList.add('scale-95');
             
-            if (modalHideTimeoutId) clearTimeout(modalHideTimeoutId);
-            modalHideTimeoutId = setTimeout(() => {
+            if (window.modalHideTimeoutId) clearTimeout(window.modalHideTimeoutId);
+            window.modalHideTimeoutId = setTimeout(() => {
                 modal.classList.add('hidden');
-                modalHideTimeoutId = null;
+                window.modalHideTimeoutId = null;
             }, 300); // 對齊 CSS transition-duration
         };
     </script>
