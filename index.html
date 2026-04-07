@@ -101,7 +101,6 @@
                                 <th class="p-4 font-bold border-b border-stone-100">聯絡電話</th>
                                 <th class="p-4 font-bold border-b border-stone-100">動物名</th>
                                 <th class="p-4 font-bold border-b border-stone-100">可候補時段與醫師</th>
-                                <th class="p-4 font-bold border-b border-stone-100">原預約紀錄</th>
                                 <th class="p-4 font-bold border-b border-stone-100 text-center">狀態</th>
                                 <th class="p-4 font-bold border-b border-stone-100 text-center">操作</th>
                             </tr>
@@ -189,7 +188,7 @@
                         </div>
                     </div>
 
-                    <!-- 可候補時段區 -->
+                    <!-- 候補時段區 -->
                     <h3 class="text-2xl font-bold text-orange-700 mb-4 bg-orange-50 p-4 px-6 rounded-2xl flex items-center gap-2">
                         <span class="bg-white text-orange-500 rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-sm font-bold">2</span>
                         可候補時段與醫師 (多選)
@@ -200,9 +199,26 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10" id="scheduleSlotsContainer"></div>
 
+                    <!-- 交通與準備時間評估區 (NEW) -->
+                    <h3 class="text-lg font-bold text-orange-700 mb-4 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
+                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">3</span>
+                        交通與準備時間評估
+                    </h3>
+                    <div class="mb-10 ml-2">
+                        <label class="block text-sm font-bold text-stone-700 mb-2">若臨時有空檔釋出，距離該時段 <span class="text-orange-600 underline">少於幾個小時</span>，就不需要打電話通知您？ <span class="text-orange-500">*</span></label>
+                        <p class="text-sm text-stone-500 mb-4 leading-relaxed font-medium">
+                            考量到接電話後整理物品、安撫毛孩情緒，以及路程的時間，每個人距離醫院的時間落差很大（部分家長甚至居住於外縣市）。請您評估最快能抵達的時間，避免太晚通知您導致趕不及。<br>
+                            📍 醫院地址：<strong class="text-stone-700">臺中市西屯區東興路三段305號</strong>（建議可先使用 Google Map 協助規劃路程）
+                        </p>
+                        <select id="travelTime" required class="w-full md:w-1/2 p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-700 cursor-pointer shadow-sm transition-all">
+                            <option value="">請選擇時間 (必選)</option>
+                            <!-- 透過 JS 動態生成選項 -->
+                        </select>
+                    </div>
+
                     <!-- 看診原因區 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-5 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">3</span>
+                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">4</span>
                         看診原因 (可複選)
                     </h3>
                     <div class="mb-10">
@@ -217,65 +233,9 @@
                         </div>
                     </div>
 
-                    <!-- Fear Free 醫療理念衛教區 -->
-                    <div class="mb-12 bg-[#F2FAFA] border border-teal-100 rounded-3xl p-8 md:p-10 shadow-sm">
-                        <h3 class="text-2xl font-black text-teal-800 flex items-center gap-2 mb-6">
-                            <span class="text-3xl">💙</span> 零恐懼醫療 (Fear Free)：行為觀察與就診準備
-                        </h3>
-                        <div class="space-y-8 text-lg leading-relaxed text-teal-900 font-medium">
-                            <div class="bg-white/60 p-6 rounded-2xl border border-teal-50 shadow-sm">
-                                <p class="mb-4 text-teal-800 font-bold text-xl">💡 請觀察毛孩是否曾出現以下緊迫行為：</p>
-                                <ul class="list-disc pl-8 space-y-3 text-stone-700 text-lg">
-                                    <li><strong class="text-teal-700">共同表現：</strong>在外出、搭車或醫院出現發抖、喘氣、躲藏。</li>
-                                    <li><strong class="text-teal-700">狗狗特有：</strong>在醫院門口抗拒進入、在診間內不斷嘗試尋找出口想要逃離。</li>
-                                    <li><strong class="text-teal-700">貓咪特有：</strong>全身僵硬、定住不動（凍結反應，像石頭一樣）、或是瞳孔極度放大。</li>
-                                </ul>
-                            </div>
-                            
-                            <p class="text-lg">
-                                若毛孩有上述反應，代表壓力正影響著他們的心理與生理。秉持 Fear Free 理念，我們建議諮詢並準備 <strong class="text-orange-600">就診前安神藥物 (PVPs)</strong>。這類藥物能幫助毛孩大腦放鬆，讓醫師取得最精準的醫療數據。
-                            </p>
-                            
-                            <div class="bg-orange-50 p-5 rounded-xl border border-orange-100 italic text-stone-600 text-base">
-                                提醒：若您的毛孩未曾於本醫院就診過，建議您可以先諮詢毛孩平時熟悉的<strong class="text-orange-700 font-bold underline decoration-orange-200">家庭醫師</strong>協助開立 PVPs 藥物。
-                            </div>
-
-                            <!-- 就診準備指南 -->
-                            <div class="mt-10 pt-10 border-t border-teal-100">
-                                <h4 class="font-black text-teal-800 mb-6 text-xl flex items-center gap-2">🎁 如何準備一場 Fear Free 的就診？</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-base">
-                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">1. 微微空腹</strong>
-                                        就診前 2-4 小時減少餵食，可預防乘車嘔吐，並增加在診間內零食獎勵的吸引力。
-                                    </div>
-                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">2. 零食大餐</strong>
-                                        請攜帶 2-3 種毛孩最愛、平常吃不到的零食（建議剪碎成碎米粒大小，方便頻繁給予）。
-                                    </div>
-                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">3. 家的味道</strong>
-                                        攜帶毛孩熟悉的玩具、或是墊過家裡床舖、有家長味道的毛巾或 T-shirt 提供安全感。
-                                    </div>
-                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">4. 籠子減敏</strong>
-                                        就診前幾天先將運輸籠放在家中活動區，放入零食讓毛孩自由進出，將籠子視為避風港。
-                                    </div>
-                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">5. 提前排泄</strong>
-                                        進入醫院前先讓毛孩排尿便。憋尿或憋便的不適感會大幅增加就診時的焦慮。
-                                    </div>
-                                    <div class="p-5 bg-white/40 rounded-xl border border-white/60">
-                                        <strong class="text-teal-800 block mb-2 text-lg font-bold">6. 從容就醫</strong>
-                                        預留充裕交通時間，家長的從容情緒是毛孩最好的安定劑。若您感到壓力，毛孩也會感受到。
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 預約紀錄區 -->
+                    <!-- 預約紀錄與密碼 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-4 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">4</span>
+                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">5</span>
                         現有預約紀錄
                     </h3>
                     <div class="mb-10 ml-2">
@@ -293,7 +253,7 @@
                     </div>
 
                     <h3 class="text-lg font-bold text-orange-700 mb-3 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">5</span>
+                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">6</span>
                         設定取消候補密碼
                     </h3>
                     <div class="mb-10 w-full md:w-1/2 ml-2">
@@ -330,7 +290,7 @@
 
             <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-8 md:p-10 mb-8">
                 <h2 class="text-2xl font-bold text-orange-600 border-l-4 border-amber-400 pl-4 mb-8 tracking-wide">管理後台 - 完整名單</h2>
-                <div class="overflow-x-auto rounded-2xl border border-stone-100"><table class="w-full text-left text-sm border-collapse"><thead class="bg-stone-50 text-stone-400"><tr><th class="p-4 border-b font-bold">登記時間</th><th class="p-4 border-b font-bold">家屬/電話</th><th class="p-4 border-b font-bold">動物資訊</th><th class="p-4 border-b font-bold">候補與預約時段</th><th class="p-4 border-b font-bold text-center">狀態</th><th class="p-4 border-b font-bold text-center">操作</th></tr></thead><tbody id="admin-tbody" class="divide-y divide-stone-50 text-stone-700"></tbody></table></div>
+                <div class="overflow-x-auto rounded-2xl border border-stone-100"><table class="w-full text-left text-sm border-collapse"><thead class="bg-stone-50 text-stone-500"><tr><th class="p-4 border-b font-bold">登記時間</th><th class="p-4 border-b font-bold">家屬/電話</th><th class="p-4 border-b font-bold">動物資訊</th><th class="p-4 border-b font-bold">候補與預約時段</th><th class="p-4 border-b font-bold text-center">狀態</th><th class="p-4 border-b font-bold text-center">操作</th></tr></thead><tbody id="admin-tbody" class="divide-y divide-stone-50 text-stone-700"></tbody></table></div>
             </div>
         </section>
     </main>
@@ -397,7 +357,19 @@
         window.onload = () => {
             setupBreedSelect();
             renderReasons();
+            setupTravelTimeSelect();
             initAuthWithRetry();
+        };
+
+        // --- 設定交通時間選單 ---
+        window.setupTravelTimeSelect = () => {
+            const select = document.getElementById('travelTime');
+            for (let i = 1; i <= 12; i += 0.5) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = `少於 ${i} 小時 ${i === 1 ? '(我 1 小時內就能趕到)' : ''}`;
+                select.appendChild(opt);
+            }
         };
 
         async function initAuthWithRetry(retryCount = 0) {
@@ -682,6 +654,7 @@
                     <td class="p-4 border-b text-xs font-medium"><strong>${item.petName}</strong> (${item.species})<br>${item.breed}</td>
                     <td class="p-4 border-b text-xs font-medium">
                         <span class="text-orange-600 font-bold">${(item.selectedSchedule || []).join(', ')}</span>
+                        <br><span class="text-teal-700 bg-teal-50 px-1 rounded mt-1 inline-block border border-teal-100">通知緩衝：至少 ${item.travelTime || '?'} 小時</span>
                         ${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">原預約：${item.futureApptDate} (${item.futureApptDoctor})</div>` : ''}
                     </td>
                     <td class="p-4 border-b text-center">
@@ -774,6 +747,7 @@
                 neutered: document.getElementById('neutered').value,
                 weight: document.getElementById('weight').value,
                 selectedSchedule,
+                travelTime: document.getElementById('travelTime').value,
                 reasons: Array.from(document.querySelectorAll('input[name="visitReason"]:checked')).map(el => el.value),
                 hasFutureAppt: hasFutureAppt,
                 futureApptDate: hasFutureAppt === 'yes' ? document.getElementById('futureApptDate').value : null,
