@@ -752,9 +752,9 @@
             const item = waitlistData.find(i => i.id === id);
             showModal('身分驗證', `毛孩【${mask(item.petName)}】您好，更新候補時段請輸入當初登記的「自訂密碼」：`, (pwd) => {
                 if (pwd === item.cancelPassword) {
-                    openUpdateModal(item);
+                    setTimeout(() => openUpdateModal(item), 350);
                 } else {
-                    showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。');
+                    setTimeout(() => showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。'), 350);
                 }
             }, true);
         };
@@ -781,7 +781,7 @@
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', item.id), { selectedSchedule: selected });
                     hideUpdateModal();
-                    showModal('更新成功', '您的候補時段已重新同步至醫院。');
+                    setTimeout(() => showModal('更新成功', '您的候補時段已重新同步至醫院。'), 350);
                 } catch(e) {
                     alert('更新失敗，請檢查網路連線。');
                 }
@@ -843,12 +843,16 @@
                 if (pwd === item.cancelPassword) { 
                     try {
                         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); 
-                        showModal('取消候補成功', '已從候補名單中移除您的資料！\n\n⚠️ 溫馨提醒：\n此操作僅代表「取消候補」。若您之前已有預約其他日期的門診也需要一併取消，請務必於營業時間致電櫃檯 04-2326-0250 辦理，釋出時段讓其他有需要的毛孩可以預約，非常感謝您的愛心與配合！'); 
+                        setTimeout(() => {
+                            showModal('取消候補成功', '已從候補名單中移除您的資料！\n\n⚠️ 溫馨提醒：\n此操作僅代表「取消候補」。若您之前已有預約其他日期的門診也需要一併取消，請務必於營業時間致電櫃檯 04-2326-0250 辦理，釋出時段讓其他有需要的毛孩可以預約，非常感謝您的愛心與配合！'); 
+                        }, 350);
                     } catch(err) {
-                        showModal('錯誤', '取消失敗，請檢查網路連線。');
+                        setTimeout(() => showModal('錯誤', '取消失敗，請檢查網路連線。'), 350);
                     }
                 }
-                else showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。');
+                else {
+                    setTimeout(() => showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。'), 350);
+                }
             }, true);
         };
 
@@ -868,7 +872,7 @@
                 showModal('登記權限驗證', '請輸入櫃檯提供的「登記密碼」以解鎖表單：', 
                     (pwd) => { 
                         if (pwd === (scheduleSettings.registerPassword || '3050')) switchMode('register'); 
-                        else showModal('錯誤', '登記密碼不正確。'); 
+                        else setTimeout(() => showModal('錯誤', '登記密碼不正確。'), 350);
                     }, 
                     true,
                     () => { switchMode('visitor'); } // 點擊取消導回首頁
@@ -877,7 +881,7 @@
                 showModal('管理端登入', '請輸入管理員密碼：', 
                     (pwd) => { 
                         if (pwd === 'gaze250305') switchMode('admin'); 
-                        else showModal('錯誤', '管理密碼不正確。'); 
+                        else setTimeout(() => showModal('錯誤', '管理密碼不正確。'), 350); 
                     }, 
                     true,
                     () => { switchMode('visitor'); } // 點擊取消導回首頁
@@ -885,7 +889,14 @@
             }
         };
 
+        let modalHideTimeoutId = null;
+
         window.showModal = (title, message, onConfirm, requireInput, onCancel = null) => {
+            if (modalHideTimeoutId) {
+                clearTimeout(modalHideTimeoutId);
+                modalHideTimeoutId = null;
+            }
+            
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').textContent = message;
             document.getElementById('modal-input-container').classList.toggle('hidden', !requireInput);
@@ -916,8 +927,9 @@
         };
         
         window.hideModal = () => {
-            document.getElementById('custom-modal').classList.add('opacity-0'); document.getElementById('modal-content-box').classList.add('scale-95');
-            setTimeout(() => document.getElementById('custom-modal').classList.add('hidden'), 300);
+            document.getElementById('custom-modal').classList.add('opacity-0'); 
+            document.getElementById('modal-content-box').classList.add('scale-95');
+            modalHideTimeoutId = setTimeout(() => document.getElementById('custom-modal').classList.add('hidden'), 300);
         };
     </script>
 </body>
