@@ -189,7 +189,7 @@
                         </div>
                     </div>
 
-                    <!-- 候補時段區 -->
+                    <!-- 可候補時段區 -->
                     <h3 class="text-2xl font-bold text-orange-700 mb-4 bg-orange-50 p-4 px-6 rounded-2xl flex items-center gap-2">
                         <span class="bg-white text-orange-500 rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-sm font-bold">2</span>
                         可候補時段與醫師 (多選)
@@ -775,7 +775,7 @@
             document.getElementById('update-modal-btn-save').onclick = async () => {
                 const selected = Array.from(document.querySelectorAll('input[name="updateSlot"]:checked')).map(el => el.value);
                 if (selected.length === 0) {
-                    alert('請至少勾選一個候補時段，或直接選擇取消登記。');
+                    alert('請至少勾選一個候補時段，或直接關閉視窗選擇取消候補。');
                     return;
                 }
                 try {
@@ -843,7 +843,7 @@
                 if (pwd === item.cancelPassword) { 
                     try {
                         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); 
-                        showModal('取消候補成功', '已從候補系統中移除您的資料！\n\n⚠️ 溫馨提醒：\n此操作僅取消「候補資格」。若您之前已有預約其他日期的門診，且也需要一併取消，請務必於營業時間致電櫃檯 04-2326-0250 辦理，將寶貴的時段釋出給其他需要的毛孩，非常感謝您的配合！'); 
+                        showModal('取消候補成功', '已從候補名單中移除您的資料！\n\n⚠️ 溫馨提醒：\n此操作僅代表「取消候補」。若您之前已有預約其他日期的門診也需要一併取消，請務必於營業時間致電櫃檯 04-2326-0250 辦理，釋出時段讓其他有需要的毛孩可以預約，非常感謝您的愛心與配合！'); 
                     } catch(err) {
                         showModal('錯誤', '取消失敗，請檢查網路連線。');
                     }
