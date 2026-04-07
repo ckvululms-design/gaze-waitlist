@@ -418,6 +418,7 @@
 
         let waitlistData = [];
         let scheduleSettings = { slots: [], note: "", registerPassword: "3050" };
+        let modalHideTimeoutId = null; // 全域變數供彈窗使用
 
         window.onload = () => {
             setupBreedSelect();
@@ -752,9 +753,9 @@
             const item = waitlistData.find(i => i.id === id);
             showModal('身分驗證', `毛孩【${mask(item.petName)}】您好，更新候補時段請輸入當初登記的「自訂密碼」：`, (pwd) => {
                 if (pwd === item.cancelPassword) {
-                    setTimeout(() => openUpdateModal(item), 350);
+                    openUpdateModal(item);
                 } else {
-                    setTimeout(() => showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。'), 350);
+                    showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。');
                 }
             }, true);
         };
@@ -781,7 +782,7 @@
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', item.id), { selectedSchedule: selected });
                     hideUpdateModal();
-                    setTimeout(() => showModal('更新成功', '您的候補時段已重新同步至醫院。'), 350);
+                    showModal('更新成功', '您的候補時段已重新同步至醫院。');
                 } catch(e) {
                     alert('更新失敗，請檢查網路連線。');
                 }
@@ -789,12 +790,16 @@
 
             const modal = document.getElementById('update-modal');
             modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); modal.children[0].classList.remove('scale-95'); }, 10);
+            // 強制瀏覽器重繪以確保過渡動畫能正常執行
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            modal.children[0].classList.remove('scale-95');
         }
 
         window.hideUpdateModal = () => {
             const modal = document.getElementById('update-modal');
-            modal.classList.add('opacity-0'); modal.children[0].classList.add('scale-95');
+            modal.classList.add('opacity-0'); 
+            modal.children[0].classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
@@ -843,15 +848,13 @@
                 if (pwd === item.cancelPassword) { 
                     try {
                         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); 
-                        setTimeout(() => {
-                            showModal('取消候補成功', '已從候補名單中移除您的資料！\n\n⚠️ 溫馨提醒：\n此操作僅代表「取消候補」。若您之前已有預約其他日期的門診也需要一併取消，請務必於營業時間致電櫃檯 04-2326-0250 辦理，釋出時段讓其他有需要的毛孩可以預約，非常感謝您的愛心與配合！'); 
-                        }, 350);
+                        showModal('取消候補成功', '已從候補名單中移除您的資料！\n\n⚠️ 溫馨提醒：\n此操作僅代表「取消候補」。若您之前已有預約其他日期的門診也需要一併取消，請務必於營業時間致電櫃檯 04-2326-0250 辦理，釋出時段讓其他有需要的毛孩可以預約，非常感謝您的愛心與配合！'); 
                     } catch(err) {
-                        setTimeout(() => showModal('錯誤', '取消失敗，請檢查網路連線。'), 350);
+                        showModal('錯誤', '取消失敗，請檢查網路連線。');
                     }
                 }
                 else {
-                    setTimeout(() => showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。'), 350);
+                    showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。');
                 }
             }, true);
         };
@@ -872,7 +875,7 @@
                 showModal('登記權限驗證', '請輸入櫃檯提供的「登記密碼」以解鎖表單：', 
                     (pwd) => { 
                         if (pwd === (scheduleSettings.registerPassword || '3050')) switchMode('register'); 
-                        else setTimeout(() => showModal('錯誤', '登記密碼不正確。'), 350);
+                        else showModal('錯誤', '登記密碼不正確。'); 
                     }, 
                     true,
                     () => { switchMode('visitor'); } // 點擊取消導回首頁
@@ -881,7 +884,7 @@
                 showModal('管理端登入', '請輸入管理員密碼：', 
                     (pwd) => { 
                         if (pwd === 'gaze250305') switchMode('admin'); 
-                        else setTimeout(() => showModal('錯誤', '管理密碼不正確。'), 350); 
+                        else showModal('錯誤', '管理密碼不正確。'); 
                     }, 
                     true,
                     () => { switchMode('visitor'); } // 點擊取消導回首頁
@@ -889,25 +892,44 @@
             }
         };
 
-        let modalHideTimeoutId = null;
-
+        // --- 優化的、防止衝突的 Modal 顯示邏輯 ---
         window.showModal = (title, message, onConfirm, requireInput, onCancel = null) => {
+            // 如果原本有正在排程要隱藏的 Timeout，直接取消，避免它強制關掉新的 Modal
             if (modalHideTimeoutId) {
                 clearTimeout(modalHideTimeoutId);
                 modalHideTimeoutId = null;
             }
+            
+            const modal = document.getElementById('custom-modal');
+            const contentBox = document.getElementById('modal-content-box');
             
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').textContent = message;
             document.getElementById('modal-input-container').classList.toggle('hidden', !requireInput);
             document.getElementById('modal-input').value = '';
             
-            // 確認按鈕處理
-            document.getElementById('modal-btn-confirm').onclick = () => { 
+            // 確認按鈕處理 (支援非同步操作)
+            const confirmBtn = document.getElementById('modal-btn-confirm');
+            confirmBtn.onclick = async () => { 
                 const val = document.getElementById('modal-input').value; 
                 if (requireInput && !val) return;
-                hideModal(); 
-                if (onConfirm) onConfirm(val); 
+                
+                // 防止重複點擊，但不關閉 Modal，等待回呼處理
+                const originalText = confirmBtn.textContent;
+                if (onConfirm) {
+                    confirmBtn.textContent = '處理中...';
+                    confirmBtn.disabled = true;
+                    try {
+                        const result = onConfirm(val);
+                        if (result instanceof Promise) await result;
+                    } finally {
+                        confirmBtn.textContent = originalText;
+                        confirmBtn.disabled = false;
+                    }
+                } else {
+                    // 如果沒有 onConfirm 事件（例如單純的成功通知），直接關閉
+                    hideModal(); 
+                }
             };
             
             // 取消按鈕處理
@@ -918,18 +940,28 @@
                 if (onCancel) onCancel(); 
             };
 
-            document.getElementById('custom-modal').classList.remove('hidden');
-            setTimeout(() => { 
-                document.getElementById('custom-modal').classList.remove('opacity-0'); 
-                document.getElementById('modal-content-box').classList.remove('scale-95'); 
-                if (requireInput) document.getElementById('modal-input').focus(); 
-            }, 10);
+            // 強制顯示
+            modal.classList.remove('hidden');
+            // 強制瀏覽器重新計算佈局，確保 Transition 動畫生效
+            void modal.offsetWidth;
+            
+            modal.classList.remove('opacity-0');
+            contentBox.classList.remove('scale-95');
+            
+            if (requireInput) document.getElementById('modal-input').focus(); 
         };
         
         window.hideModal = () => {
-            document.getElementById('custom-modal').classList.add('opacity-0'); 
-            document.getElementById('modal-content-box').classList.add('scale-95');
-            modalHideTimeoutId = setTimeout(() => document.getElementById('custom-modal').classList.add('hidden'), 300);
+            const modal = document.getElementById('custom-modal');
+            const contentBox = document.getElementById('modal-content-box');
+            modal.classList.add('opacity-0'); 
+            contentBox.classList.add('scale-95');
+            
+            if (modalHideTimeoutId) clearTimeout(modalHideTimeoutId);
+            modalHideTimeoutId = setTimeout(() => {
+                modal.classList.add('hidden');
+                modalHideTimeoutId = null;
+            }, 300); // 對齊 CSS transition-duration
         };
     </script>
 </body>
