@@ -418,7 +418,6 @@
 
         let waitlistData = [];
         let scheduleSettings = { slots: [], note: "", registerPassword: "3050" };
-        let modalHideTimeoutId = null; // 全域變數供彈窗使用
 
         window.onload = () => {
             setupBreedSelect();
@@ -699,7 +698,7 @@
                         <td class="p-4 border-b text-center">
                             <div class="flex flex-col gap-1">
                                 <button onclick="promptSelfUpdate('${item.id}')" class="text-[10px] text-teal-600 hover:underline font-bold transition-colors">更新時段</button>
-                                <button onclick="promptSelfCancel('${item.id}')" class="text-[10px] text-stone-400 hover:text-red-500 underline font-bold transition-colors">取消候補</button>
+                                <button onclick="promptSelfCancel('${item.id}')" class="text-[10px] text-stone-400 hover:text-red-500 underline font-bold transition-colors mt-1">取消候補</button>
                             </div>
                         </td>
                     `;
@@ -718,26 +717,40 @@
             waitlistData.forEach(item => {
                 const tr = document.createElement('tr');
                 const isDone = item.status === 'done';
-                const isExpired = item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today;
+                const isCanceled = item.status === 'canceled'; // 新增：判斷是否為已取消
+                const isExpired = item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today && !isDone && !isCanceled;
                 
-                tr.className = (isDone || isExpired) ? "opacity-40 grayscale bg-stone-50" : "hover:bg-stone-50 transition-colors";
+                tr.className = (isDone || isExpired || isCanceled) ? "opacity-40 grayscale bg-stone-50" : "hover:bg-stone-50 transition-colors";
+                
+                // 動態設定狀態標籤
+                let badgeClass = 'bg-orange-100 text-orange-700';
+                let badgeText = '候補中';
+                if (isDone) { badgeClass = 'bg-teal-100 text-teal-700'; badgeText = '已完成'; }
+                else if (isCanceled) { badgeClass = 'bg-red-100 text-red-700'; badgeText = '已自行取消'; }
+                else if (isExpired) { badgeClass = 'bg-stone-200 text-stone-600'; badgeText = '已過期'; }
+
+                // 動態設定操作按鈕（若是完成或取消，則改為還原按鈕）
+                let actionBtn = `<button onclick="toggleStatus('${item.id}', 'done')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">完成</button>`;
+                if (isDone || isCanceled) {
+                    actionBtn = `<button onclick="toggleStatus('${item.id}', 'waiting')" class="text-xs bg-stone-500 hover:bg-stone-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">還原</button>`;
+                }
+
                 tr.innerHTML = `
                     <td class="p-4 border-b text-xs text-stone-500">${item.timestamp}</td>
                     <td class="p-4 border-b"><strong>${item.ownerName}</strong><br><span class="text-xs text-stone-500 font-mono">${item.phone}</span></td>
                     <td class="p-4 border-b text-xs font-medium"><strong>${item.petName}</strong> (${item.species})<br>${item.breed}</td>
                     <td class="p-4 border-b text-xs font-medium">
                         <span class="text-orange-600 font-bold">${(item.selectedSchedule || []).join(', ')}</span>
-                        <br><span class="text-teal-700 bg-teal-50 px-1 rounded mt-1 inline-block border border-teal-100">通知緩衝：至少 ${item.travelTime || '?'} 小時</span>
                         ${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">原預約：${item.futureApptDate} (${item.futureApptDoctor})</div>` : ''}
                     </td>
                     <td class="p-4 border-b text-center">
-                        <span class="px-2 py-1 rounded-full text-xs font-bold ${isDone ? 'bg-teal-100 text-teal-700' : (isExpired ? 'bg-stone-200 text-stone-600' : 'bg-orange-100 text-orange-700')}">
-                            ${isDone ? '已完成' : (isExpired ? '已過期' : '候補中')}
+                        <span class="px-2 py-1 rounded-full text-xs font-bold ${badgeClass}">
+                            ${badgeText}
                         </span>
                         <div class="text-[10px] mt-1 text-stone-400 font-mono">PWD: ${item.cancelPassword}</div>
                     </td>
                     <td class="p-4 border-b text-center whitespace-nowrap">
-                        <button onclick="toggleDone('${item.id}', '${isDone ? 'waiting' : 'done'}')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">${isDone ? '還原' : '完成'}</button> 
+                        ${actionBtn}
                         <button onclick="adminDelete('${item.id}')" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg ml-1 shadow-sm font-bold transition-colors">刪除</button>
                     </td>
                 `;
@@ -745,63 +758,8 @@
             });
         };
 
-        window.toggleDone = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status }); };
-        window.adminDelete = async (id) => { if (confirm('確定要從候補名單中永久刪除此筆資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
-
-        // --- 更新時段邏輯 ---
-        window.promptSelfUpdate = (id) => {
-            const item = waitlistData.find(i => i.id === id);
-            showModal('身分驗證', `毛孩【${mask(item.petName)}】您好，更新候補時段請輸入當初登記的「自訂密碼」：`, (pwd) => {
-                if (pwd === item.cancelPassword) {
-                    openUpdateModal(item);
-                } else {
-                    showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。');
-                }
-            }, true);
-        };
-
-        function openUpdateModal(item) {
-            const container = document.getElementById('update-slots-container');
-            const infoText = document.getElementById('update-modal-info');
-            infoText.textContent = `毛孩：${item.petName} | 家屬：${item.ownerName}`;
-            container.innerHTML = '';
-            
-            scheduleSettings.slots.forEach(slot => {
-                const isChecked = (item.selectedSchedule || []).includes(slot) ? 'checked' : '';
-                const div = document.createElement('div');
-                div.innerHTML = `<label class="flex items-center gap-3 p-4 border rounded-xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm"><input type="checkbox" name="updateSlot" value="${slot}" ${isChecked} class="w-5 h-5 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-xs font-bold text-stone-700 leading-tight">${slot}</span></label>`;
-                container.appendChild(div);
-            });
-
-            document.getElementById('update-modal-btn-save').onclick = async () => {
-                const selected = Array.from(document.querySelectorAll('input[name="updateSlot"]:checked')).map(el => el.value);
-                if (selected.length === 0) {
-                    alert('請至少勾選一個候補時段，或直接關閉視窗選擇取消候補。');
-                    return;
-                }
-                try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', item.id), { selectedSchedule: selected });
-                    hideUpdateModal();
-                    showModal('更新成功', '您的候補時段已重新同步至醫院。');
-                } catch(e) {
-                    alert('更新失敗，請檢查網路連線。');
-                }
-            };
-
-            const modal = document.getElementById('update-modal');
-            modal.classList.remove('hidden');
-            // 強制瀏覽器重繪以確保過渡動畫能正常執行
-            void modal.offsetWidth;
-            modal.classList.remove('opacity-0');
-            modal.children[0].classList.remove('scale-95');
-        }
-
-        window.hideUpdateModal = () => {
-            const modal = document.getElementById('update-modal');
-            modal.classList.add('opacity-0'); 
-            modal.children[0].classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        };
+        window.toggleStatus = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status }); };
+        window.adminDelete = async (id) => { if (confirm('確定要從雲端永久刪除此筆候補資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
 
         window.handleRegisterSubmit = async (e) => {
             e.preventDefault();
@@ -844,17 +802,23 @@
 
         window.promptSelfCancel = (id) => {
             const item = waitlistData.find(i => i.id === id);
-            showModal('取消身份驗證', `確定要取消毛孩【${mask(item.petName)}】的候補嗎？\n請輸入自訂密碼：`, async (pwd) => {
+            // 直接在密碼輸入框顯示提醒文字
+            const msg = `確定要取消毛孩【${mask(item.petName)}】的候補登記嗎？\n\n⚠️ 溫馨提醒：此操作僅限於取消候補名單，若您要取消原本已預約的門診時段，仍需於營業時間致電櫃檯 04-2326-0250 取消。\n\n請輸入自訂密碼：`;
+            
+            showModal('取消候補', msg, async (pwd) => {
                 if (pwd === item.cancelPassword) { 
                     try {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); 
-                        showModal('取消候補成功', '已從候補名單中移除您的資料！\n\n⚠️ 溫馨提醒：\n此操作僅代表「取消候補」。若您之前已有預約其他日期的門診也需要一併取消，請務必於營業時間致電櫃檯 04-2326-0250 辦理，釋出時段讓其他有需要的毛孩可以預約，非常感謝您的愛心與配合！'); 
+                        // 【修改點】原本的 deleteDoc 改成 updateDoc (軟刪除)，保留在後台
+                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status: 'canceled' }); 
+                        setTimeout(() => {
+                            showModal('取消成功', '已從候補系統中移除您的資料，感謝您的配合！\n\n(若有預約原門診，請記得致電 04-2326-0250 取消喔)'); 
+                        }, 350);
                     } catch(err) {
-                        showModal('錯誤', '取消失敗，請檢查網路連線。');
+                        setTimeout(() => showModal('錯誤', '取消失敗，請檢查網路連線。'), 350);
                     }
                 }
                 else {
-                    showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。');
+                    setTimeout(() => showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。'), 350);
                 }
             }, true);
         };
@@ -875,7 +839,7 @@
                 showModal('登記權限驗證', '請輸入櫃檯提供的「登記密碼」以解鎖表單：', 
                     (pwd) => { 
                         if (pwd === (scheduleSettings.registerPassword || '3050')) switchMode('register'); 
-                        else showModal('錯誤', '登記密碼不正確。'); 
+                        else setTimeout(() => showModal('錯誤', '登記密碼不正確。'), 350);
                     }, 
                     true,
                     () => { switchMode('visitor'); } // 點擊取消導回首頁
@@ -884,7 +848,7 @@
                 showModal('管理端登入', '請輸入管理員密碼：', 
                     (pwd) => { 
                         if (pwd === 'gaze250305') switchMode('admin'); 
-                        else showModal('錯誤', '管理密碼不正確。'); 
+                        else setTimeout(() => showModal('錯誤', '管理密碼不正確。'), 350); 
                     }, 
                     true,
                     () => { switchMode('visitor'); } // 點擊取消導回首頁
@@ -892,9 +856,9 @@
             }
         };
 
-        // --- 優化的、防止衝突的 Modal 顯示邏輯 ---
+        let modalHideTimeoutId = null;
+
         window.showModal = (title, message, onConfirm, requireInput, onCancel = null) => {
-            // 如果原本有正在排程要隱藏的 Timeout，直接取消，避免它強制關掉新的 Modal
             if (modalHideTimeoutId) {
                 clearTimeout(modalHideTimeoutId);
                 modalHideTimeoutId = null;
@@ -908,28 +872,12 @@
             document.getElementById('modal-input-container').classList.toggle('hidden', !requireInput);
             document.getElementById('modal-input').value = '';
             
-            // 確認按鈕處理 (支援非同步操作)
-            const confirmBtn = document.getElementById('modal-btn-confirm');
-            confirmBtn.onclick = async () => { 
+            // 確認按鈕處理
+            document.getElementById('modal-btn-confirm').onclick = () => { 
                 const val = document.getElementById('modal-input').value; 
                 if (requireInput && !val) return;
-                
-                // 防止重複點擊，但不關閉 Modal，等待回呼處理
-                const originalText = confirmBtn.textContent;
-                if (onConfirm) {
-                    confirmBtn.textContent = '處理中...';
-                    confirmBtn.disabled = true;
-                    try {
-                        const result = onConfirm(val);
-                        if (result instanceof Promise) await result;
-                    } finally {
-                        confirmBtn.textContent = originalText;
-                        confirmBtn.disabled = false;
-                    }
-                } else {
-                    // 如果沒有 onConfirm 事件（例如單純的成功通知），直接關閉
-                    hideModal(); 
-                }
+                hideModal(); 
+                if (onConfirm) onConfirm(val); 
             };
             
             // 取消按鈕處理
