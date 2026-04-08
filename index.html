@@ -44,6 +44,19 @@
             padding: 0 8px;
             color: #9ca3af;
         }
+        
+        /* 隱藏按鈕樣式 */
+        .secret-trigger { 
+            position: absolute; 
+            bottom: 15px; 
+            padding: 5px; 
+            cursor: default; 
+            color: transparent; 
+            font-size: 10px; 
+            user-select: none; 
+            transition: color 0.3s;
+        }
+        .secret-trigger:hover { color: #d1d5db; cursor: pointer; }
     </style>
 </head>
 <body class="bg-[#FDFCF8] text-stone-800 min-h-screen flex flex-col is-loading" id="app-body">
@@ -78,7 +91,7 @@
     </div>
 
     <!-- 主要內容區 -->
-    <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-10 md:py-14 content-wrapper">
+    <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-10 md:py-14 content-wrapper relative">
         
         <!-- 1. 訪客模式：候補名單 -->
         <section id="sec-visitor" class="fade-in">
@@ -116,15 +129,96 @@
             </div>
         </section>
 
-        <!-- 2. 家屬登記候補模式 (表單) -->
+        <!-- 2. 櫃檯專用：建立初始檔案 (STAFF INIT) -->
+        <section id="sec-staff-init" class="hidden-section fade-in">
+            <div class="bg-stone-100 rounded-3xl shadow-sm border border-stone-200 p-8 md:p-12 max-w-2xl mx-auto mt-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-teal-500"></div>
+                <div class="flex items-center gap-4 mb-8">
+                    <button onclick="window.switchMode('visitor')" class="text-stone-400 hover:text-stone-600 transition-colors font-bold text-sm">⬅️ 返回首頁</button>
+                    <h2 class="text-3xl font-black text-teal-800 tracking-wide">櫃檯專用：建立候補檔案</h2>
+                </div>
+                <form onsubmit="window.handleStaffInitSubmit(event)" class="space-y-6">
+                    <p class="text-sm text-teal-700 font-medium bg-teal-50 p-4 rounded-xl border border-teal-100">
+                        請輸入家長預約好的時段與電話。建立完成後，請引導家長至首頁右上角點選「登記候補」，輸入這組電話與日期來填寫詳細的毛孩資訊。
+                    </p>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-2">家屬聯絡電話 <span class="text-orange-500">*</span></label>
+                        <input type="tel" id="init-phone" required pattern="[0-9]{8,15}" class="w-full p-4 border border-stone-300 rounded-xl focus:ring-2 focus:ring-teal-400 font-mono text-lg outline-none transition-all" placeholder="09XXXXXXXX">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-bold text-stone-700 mb-2">原預約日期 <span class="text-orange-500">*</span></label>
+                            <input type="date" id="init-date" required class="w-full p-4 border border-stone-300 rounded-xl focus:ring-2 focus:ring-teal-400 font-mono text-lg outline-none transition-all">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-bold text-stone-700 mb-2">原預約時間 <span class="text-orange-500">*</span></label>
+                            <select id="init-time" required class="w-full p-4 border border-stone-300 rounded-xl focus:ring-2 focus:ring-teal-400 font-mono text-lg outline-none cursor-pointer transition-all">
+                                <option value="">請選擇時間</option>
+                                <option value="09:00">09:00</option>
+                                <option value="09:30">09:30</option>
+                                <option value="10:00">10:00</option>
+                                <option value="10:30">10:30</option>
+                                <option value="11:00">11:00</option>
+                                <option value="11:30">11:30</option>
+                                <option value="13:00">13:00</option>
+                                <option value="13:30">13:30</option>
+                                <option value="14:00">14:00</option>
+                                <option value="14:30">14:30</option>
+                                <option value="15:00">15:00</option>
+                                <option value="15:30">15:30</option>
+                                <option value="16:00">16:00</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-2">原預約醫師 <span class="text-orange-500">*</span></label>
+                        <select id="init-doctor" required class="w-full p-4 border border-stone-300 rounded-xl focus:ring-2 focus:ring-teal-400 font-bold text-lg text-stone-700 outline-none cursor-pointer transition-all">
+                            <option value="">請選擇醫師</option>
+                            <option value="詹益萍">詹益萍 醫師</option>
+                            <option value="薛彤">薛彤 醫師</option>
+                            <option value="楊崇君">楊崇君 醫師</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="submit" class="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-black text-xl rounded-xl shadow-lg transition-all transform hover:-translate-y-1">建立初始檔案</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- 3. 家屬登記候補模式 (表單) -->
         <section id="sec-register" class="hidden-section fade-in">
             <div class="bg-white rounded-3xl shadow-sm border border-stone-100 p-8 md:p-12">
-                <h2 class="text-3xl font-bold text-orange-600 border-l-4 border-amber-400 pl-4 mb-8 tracking-wide">新增候補登記</h2>
+                <h2 class="text-3xl font-bold text-orange-600 border-l-4 border-amber-400 pl-4 mb-8 tracking-wide">新增/完成候補登記</h2>
                 
                 <form id="waitlist-form" onsubmit="window.handleRegisterSubmit(event)">
+                    
+                    <!-- 預約紀錄 (不可改) -->
+                    <h3 class="text-lg font-bold text-orange-700 mb-4 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
+                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">1</span>
+                        已確認之預約紀錄
+                    </h3>
+                    <div class="mb-10 ml-2 bg-stone-50 border border-stone-200 p-6 rounded-2xl shadow-inner">
+                        <p class="text-xs text-stone-400 font-bold mb-4 uppercase tracking-widest">由診所櫃檯建檔完成，如需修改請致電 04-2326-0250</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-stone-700 mb-5">
+                            <div><span class="block text-xs font-bold text-stone-400 mb-1">預約日期</span><span id="display-appt-date" class="text-xl font-mono font-black text-stone-800"></span></div>
+                            <div><span class="block text-xs font-bold text-stone-400 mb-1">預約時間</span><span id="display-appt-time" class="text-xl font-mono font-black text-stone-800"></span></div>
+                            <div><span class="block text-xs font-bold text-stone-400 mb-1">主治醫師</span><span id="display-appt-doc" class="text-xl font-black text-stone-800"></span></div>
+                        </div>
+                        <div class="border-t border-stone-200 pt-4">
+                            <label class="block text-xs font-bold text-stone-400 mb-1">驗證手機號碼</label>
+                            <input type="tel" id="phone" readonly class="w-full md:w-1/3 p-3 border border-stone-200 rounded-xl bg-stone-100 outline-none font-mono text-stone-500 cursor-not-allowed">
+                        </div>
+                    </div>
+
                     <!-- 基本資料區 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-5 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">1</span>
+                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">2</span>
                         基本資料
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
@@ -139,10 +233,18 @@
                                 </select>
                             </div>
                         </div>
+                        
+                        <!-- 新增：方便接電話時間 -->
                         <div>
-                            <label class="block text-sm font-bold text-stone-700 mb-2">聯絡電話 <span class="text-orange-500">*</span></label>
-                            <input type="tel" id="phone" required pattern="[0-9]{8,15}" class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800" placeholder="例：0912345678">
+                            <label class="block text-sm font-bold text-stone-700 mb-2">方便接聽電話的時間 <span class="text-orange-500">*</span></label>
+                            <select id="preferredCallTime" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-700 cursor-pointer transition-all">
+                                <option value="">請選擇時間</option>
+                                <option value="上午和下午皆可">上午和下午皆可</option>
+                                <option value="上午">上午 (09:00 - 12:00)</option>
+                                <option value="下午">下午 (13:00 - 17:00)</option>
+                            </select>
                         </div>
+
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">動物名 <span class="text-orange-500">*</span></label>
                             <input type="text" id="petName" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800">
@@ -191,7 +293,7 @@
 
                     <!-- 可候補時段區 -->
                     <h3 class="text-2xl font-bold text-orange-700 mb-4 bg-orange-50 p-4 px-6 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-sm font-bold">2</span>
+                        <span class="bg-white text-orange-500 rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-sm font-bold">3</span>
                         可候補時段與醫師 (多選)
                     </h3>
                     <div class="mb-6 ml-2">
@@ -202,7 +304,7 @@
 
                     <!-- 交通與準備時間評估區 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-4 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">3</span>
+                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">4</span>
                         交通與準備時間評估
                     </h3>
                     <div class="mb-10 ml-2">
@@ -219,7 +321,7 @@
 
                     <!-- 看診原因區 -->
                     <h3 class="text-lg font-bold text-orange-700 mb-5 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">4</span>
+                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">5</span>
                         看診原因 (可複選)
                     </h3>
                     <div class="mb-10">
@@ -298,33 +400,6 @@
                         </div>
                     </div>
 
-                    <!-- 預約紀錄區 -->
-                    <h3 class="text-lg font-bold text-orange-700 mb-4 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">5</span>
-                        現有預約紀錄
-                    </h3>
-                    <div class="mb-10 ml-2">
-                        <p class="text-sm text-stone-600 font-bold mb-3">請問您是否已先致電預約過本院較後面的時段？</p>
-                        <div class="flex gap-6 mb-4">
-                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700"><input type="radio" name="hasFutureAppt" value="yes" onchange="window.toggleFutureApptFields()" class="w-5 h-5 text-orange-500 focus:ring-orange-500 border-stone-300"> 是，已有預約</label>
-                            <label class="flex items-center gap-2 cursor-pointer font-medium text-stone-700"><input type="radio" name="hasFutureAppt" value="no" checked onchange="window.toggleFutureApptFields()" class="w-5 h-5 text-orange-500 focus:ring-orange-500 border-stone-300"> 否，尚未預約</label>
-                        </div>
-                        <div id="futureApptFields" class="hidden bg-stone-50 border border-stone-200 p-5 rounded-2xl mt-4 shadow-inner">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-bold text-stone-700 mb-2">原預約日期</label><input type="date" id="futureApptDate" class="w-full p-3 border border-stone-300 rounded-xl focus:ring-4 focus:ring-amber-100 outline-none bg-white font-medium text-stone-800"></div>
-                                <div><label class="block text-sm font-bold text-stone-700 mb-2">原預約醫師</label><select id="futureApptDoctor" class="w-full p-3 border border-stone-300 rounded-xl focus:ring-4 focus:ring-amber-100 outline-none bg-white font-medium text-stone-700 cursor-pointer"><option value="">請選擇</option><option value="詹益萍">詹益萍 醫師</option><option value="薛彤">薛彤 醫師</option><option value="楊崇君">楊崇君 醫師</option><option value="不確定">不確定/忘記了</option></select></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-orange-700 mb-3 bg-orange-50 p-3 px-5 rounded-2xl flex items-center gap-2">
-                        <span class="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-sm font-bold">6</span>
-                        設定取消候補密碼
-                    </h3>
-                    <div class="mb-10 w-full md:w-1/2 ml-2">
-                        <input type="text" id="cancelPassword" required class="w-full p-4 border-2 border-amber-200 rounded-xl focus:ring-4 focus:ring-amber-100 focus:border-amber-400 outline-none bg-white font-mono text-lg shadow-sm transition-all" placeholder="請輸入自訂取消密碼 (建議使用手機號碼)">
-                    </div>
-
                     <div class="text-center mt-12 bg-stone-50 p-8 rounded-3xl border border-stone-100">
                         <label class="flex items-center justify-center gap-3 mb-8 cursor-pointer group">
                             <input type="checkbox" required class="w-6 h-6 text-orange-500 border-stone-300 rounded focus:ring-orange-500 cursor-pointer">
@@ -336,7 +411,7 @@
             </div>
         </section>
 
-        <!-- 3. 管理者模式 -->
+        <!-- 4. 管理者模式 -->
         <section id="sec-admin" class="hidden-section fade-in">
             <div class="bg-stone-800 rounded-3xl shadow-lg border border-stone-700 p-8 md:p-10 mb-8 text-white">
                 <h2 class="text-2xl font-bold text-amber-400 border-l-4 border-amber-400 pl-4 mb-6 tracking-wide uppercase">系統班表與公告設定</h2>
@@ -346,7 +421,7 @@
                         <div id="admin-schedule-inputs" class="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar"></div>
                     </div>
                     <div class="bg-stone-900/50 p-6 rounded-2xl border border-stone-700">
-                        <div class="mb-6"><h3 class="text-lg font-bold text-stone-200 mb-3">安全設定</h3><label class="text-xs text-stone-400 font-bold uppercase tracking-wider">登記候補密碼 (前台解鎖用)</label><input type="text" id="admin-register-password" class="w-full p-3 border border-stone-600 rounded-xl bg-stone-800 text-white mt-1 font-mono"></div>
+                        <div class="mb-6"><h3 class="text-lg font-bold text-stone-200 mb-3">安全設定</h3><label class="text-xs text-stone-400 font-bold uppercase tracking-wider">櫃檯建檔解鎖密碼 (預設: 3050)</label><input type="text" id="admin-register-password" class="w-full p-3 border border-stone-600 rounded-xl bg-stone-800 text-white mt-1 font-mono"></div>
                         <div><h3 class="text-lg font-bold text-stone-200 mb-3">前台公告編輯</h3><textarea id="admin-schedule-note" class="w-full p-4 border border-stone-600 rounded-xl bg-stone-800 text-white resize-none min-h-[120px] custom-scrollbar leading-relaxed"></textarea></div>
                     </div>
                 </div>
@@ -362,7 +437,10 @@
 
     <footer class="text-stone-400 text-center py-8 text-sm mt-auto relative font-medium">
         <p>© 2026 凝視犬貓專科醫院 Gaze Veterinary Cardiology. All Rights Reserved.</p>
-        <button onclick="window.promptLogin('admin')" class="absolute bottom-4 right-4 text-transparent hover:text-stone-300 text-xs cursor-default transition-colors">管理員登入</button>
+        <!-- 櫃檯建檔隱藏按鈕 (左下) -->
+        <div class="secret-trigger font-mono left-4" onclick="window.promptLogin('staff')">Clinic_Init</div>
+        <!-- 管理端隱藏按鈕 (右下) -->
+        <div class="secret-trigger font-mono right-4" onclick="window.promptLogin('admin')">Admin_Login</div>
     </footer>
 
     <!-- Update Modal (更新時段專用) -->
@@ -380,17 +458,39 @@
         </div>
     </div>
 
-    <!-- Modals (通用提示) -->
+    <!-- Auth Modal (雙重驗證專用) -->
+    <div id="auth-modal" class="fixed inset-0 bg-stone-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-md transform scale-95 transition-transform duration-300 border border-stone-100" id="auth-modal-content-box">
+            <h3 id="auth-modal-title" class="text-2xl font-bold mb-4 text-stone-800">家屬身分驗證</h3>
+            <p id="auth-modal-message" class="text-stone-600 mb-6 text-sm leading-relaxed font-medium">請輸入您致電預約時留下的手機號碼，以及預約好的門診日期，以利系統進行驗證。</p>
+            <div class="space-y-4 mb-8">
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 mb-1">手機號碼</label>
+                    <input type="tel" id="auth-phone" class="w-full p-4 border-2 border-stone-100 rounded-xl focus:border-orange-400 outline-none font-mono text-xl shadow-inner bg-stone-50" placeholder="09XX...">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 mb-1">原預約日期</label>
+                    <input type="date" id="auth-date" class="w-full p-4 border-2 border-stone-100 rounded-xl focus:border-orange-400 outline-none font-mono text-xl shadow-inner bg-stone-50">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button onclick="window.hideAuthModal()" class="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-xl font-bold text-stone-500 transition-colors">取消</button>
+                <button id="auth-modal-btn-confirm" class="px-8 py-2.5 text-white bg-orange-500 hover:bg-orange-600 rounded-xl font-black shadow-md shadow-orange-100 transition-all">驗證並進入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals (通用密碼提示) -->
     <div id="custom-modal" class="fixed inset-0 bg-stone-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl shadow-2xl p-8 w-11/12 max-w-md transform scale-95 transition-transform duration-300 border border-stone-100" id="modal-content-box">
             <h3 id="modal-title" class="text-2xl font-bold mb-4 text-stone-800">提示</h3>
             <p id="modal-message" class="text-stone-600 mb-8 leading-relaxed whitespace-pre-line font-medium"></p>
             <div id="modal-input-container" class="hidden mb-8">
-                <input type="password" id="modal-input" class="w-full p-4 border-2 border-stone-100 rounded-xl focus:border-orange-400 outline-none font-mono text-2xl shadow-inner bg-stone-50 text-center">
+                <input type="password" id="modal-input" class="w-full p-4 border-2 border-stone-100 rounded-xl focus:border-teal-400 outline-none font-mono text-2xl shadow-inner bg-stone-50 text-center">
             </div>
             <div class="flex justify-end gap-3">
                 <button id="modal-btn-cancel" class="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-xl font-bold text-stone-500 hidden transition-colors">取消</button>
-                <button id="modal-btn-confirm" class="px-8 py-2.5 text-white bg-orange-500 hover:bg-orange-600 rounded-xl font-black shadow-md shadow-orange-100 transition-all">確認</button>
+                <button id="modal-btn-confirm" class="px-8 py-2.5 text-white bg-teal-500 hover:bg-teal-600 rounded-xl font-black shadow-md shadow-teal-100 transition-all">確認</button>
             </div>
         </div>
     </div>
@@ -416,13 +516,14 @@
         const db = getFirestore(app);
         const appId = 'gaze-vet-waitlist';
 
-        let waitlistData = [];
-        let scheduleSettings = { slots: [], note: "", registerPassword: "3050" };
+        window.waitlistData = [];
+        window.scheduleSettings = { slots: [], note: "", registerPassword: "3050" };
+        window.currentParentRecord = null; 
 
         window.onload = () => {
-            setupBreedSelect();
-            renderReasons();
-            setupTravelTimeSelect();
+            window.setupBreedSelect();
+            window.renderReasons();
+            window.setupTravelTimeSelect();
             initAuthWithRetry();
         };
 
@@ -439,16 +540,13 @@
 
         async function initAuthWithRetry(retryCount = 0) {
             const maxRetries = 3;
-            const loadingText = document.getElementById('loading-text');
-            const retryHint = document.getElementById('retry-hint');
             try {
                 await signInAnonymously(auth);
                 console.log("連線成功");
             } catch (err) {
-                console.error(`連線重試 ${retryCount + 1}:`, err);
                 if (retryCount < maxRetries) {
-                    retryHint.classList.remove('hidden');
-                    loadingText.textContent = `伺服器同步中... (${retryCount + 1}/${maxRetries})`;
+                    document.getElementById('retry-hint').classList.remove('hidden');
+                    document.getElementById('loading-text').textContent = `伺服器同步中... (${retryCount + 1}/${maxRetries})`;
                     setTimeout(() => initAuthWithRetry(retryCount + 1), 2000);
                 } else {
                     document.getElementById('app-body').classList.remove('is-loading');
@@ -462,9 +560,9 @@
         function setupFirestoreListeners() {
             const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config');
             onSnapshot(settingsRef, (docSnap) => {
-                if (docSnap.exists()) scheduleSettings = docSnap.data();
+                if (docSnap.exists()) window.scheduleSettings = docSnap.data();
                 else {
-                    scheduleSettings = { 
+                    window.scheduleSettings = { 
                         slots: [
                             "週一上午 - 詹益萍", "週一下午 - 詹益萍", "週一下午 - 楊崇君",
                             "週二上午 - 薛彤", "週二下午 - 薛彤",
@@ -476,18 +574,18 @@
                         note: "1. 醫師休診公告\n\n【門診異動通知】楊崇君醫師將於 4/11 至 5/10 期間暫停門診服務。若有相關看診需求，建議您提前安排或致電櫃檯洽詢，造成不便敬請見諒。\n\n2. 登記與取消提醒\n\n【溫馨提醒：候補資源共享】登記完成後，請務必熟記您所設定的「自訂取消密碼」。若等候期間您的寶貝已於他院完成診療，請利用該密碼回到本網頁手動取消候補，或直接致電櫃檯由人員協助處理。\n\n3. 候補失效與電話通知說明\n\n【候補系統運作須知】本系統協助您嘗試「提前」看診。若直到您的「原預約時段」前皆無名額釋出，櫃檯將不主動致電詢問；一旦時間超過您的原預約日期，該筆候補登記將自動失效。", 
                         registerPassword: "3050" 
                     };
-                    setDoc(settingsRef, scheduleSettings);
+                    setDoc(settingsRef, window.scheduleSettings);
                 }
-                renderScheduleElements();
+                window.renderScheduleElements();
                 document.getElementById('app-body').classList.remove('is-loading');
             });
 
             const waitlistRef = collection(db, 'artifacts', appId, 'public', 'data', 'waitlist');
             onSnapshot(waitlistRef, (snapshot) => {
-                waitlistData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                waitlistData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                renderVisitorTable();
-                renderAdminTable();
+                window.waitlistData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                window.waitlistData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                window.renderVisitorTable();
+                window.renderAdminTable();
             });
         }
 
@@ -521,11 +619,8 @@
             const reasons = Array.from(document.querySelectorAll('input[name="visitReason"]:checked')).map(el => el.value);
             document.getElementById('coughWarning').classList.toggle('hidden', !reasons.includes('咳嗽'));
             document.getElementById('referralWarning').classList.toggle('hidden', !reasons.includes('他院轉診'));
-            
-            // 麻醉前評估通知
             document.getElementById('anesthesiaWarning').classList.toggle('hidden', !reasons.includes('麻醉前評估'));
             
-            // 呼吸異常、昏倒、虛弱 急診警訊
             const needsEmergencyWarning = reasons.some(r => ['呼吸異常', '昏倒', '虛弱'].includes(r));
             document.getElementById('emergencyWarning').classList.toggle('hidden', !needsEmergencyWarning);
         };
@@ -536,9 +631,9 @@
         };
 
         window.renderScheduleElements = () => {
-            const sortedSlots = scheduleSettings.slots || [];
+            const sortedSlots = window.scheduleSettings.slots || [];
 
-            // 1. 更新家屬登記頁面的 Checkboxes (字體放大)
+            // 家屬登記頁面的 Checkboxes (字體放大)
             const regContainer = document.getElementById('scheduleSlotsContainer');
             if (regContainer) {
                 regContainer.innerHTML = '';
@@ -549,7 +644,7 @@
                 });
             }
             
-            // 2. 更新管理後台的 Input Rows
+            // 管理後台的 Input Rows
             const adminInputs = document.getElementById('admin-schedule-inputs');
             if (adminInputs) {
                 adminInputs.innerHTML = '';
@@ -560,10 +655,10 @@
                 setupDragAndDrop(adminInputs);
             }
             
-            document.getElementById('admin-register-password').value = scheduleSettings.registerPassword || "3050";
-            document.getElementById('admin-schedule-note').value = scheduleSettings.note || "";
+            document.getElementById('admin-register-password').value = window.scheduleSettings.registerPassword || "3050";
+            document.getElementById('admin-schedule-note').value = window.scheduleSettings.note || "";
             const noteDiv = document.getElementById('dynamic-schedule-note');
-            if (scheduleSettings.note) { noteDiv.textContent = scheduleSettings.note; noteDiv.classList.remove('hidden'); } else noteDiv.classList.add('hidden');
+            if (window.scheduleSettings.note) { noteDiv.textContent = window.scheduleSettings.note; noteDiv.classList.remove('hidden'); } else noteDiv.classList.add('hidden');
         };
 
         function createAdminSlotRow(val, idx) {
@@ -571,9 +666,7 @@
             div.className = "drag-row flex gap-2 bg-stone-700 p-1 rounded border border-stone-600";
             div.draggable = true;
             div.innerHTML = `
-                <div class="drag-handle">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
-                </div>
+                <div class="drag-handle"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg></div>
                 <input type="text" value="${val}" class="slot-val-input flex-grow p-2 border-0 rounded bg-stone-800 text-white font-medium focus:ring-1 focus:ring-amber-500 outline-none">
                 <button onclick="this.parentElement.remove()" class="text-red-400 px-3 font-bold hover:text-red-300 transition-colors">✕</button>
             `;
@@ -581,37 +674,14 @@
         }
 
         function setupDragAndDrop(container) {
-            container.removeEventListener('dragstart', handleDragStart);
-            container.removeEventListener('dragend', handleDragEnd);
-            container.removeEventListener('dragover', handleDragOver);
-
-            container.addEventListener('dragstart', handleDragStart);
-            container.addEventListener('dragend', handleDragEnd);
-            container.addEventListener('dragover', handleDragOver);
-        }
-
-        function handleDragStart(e) {
-            const row = e.target.closest('.drag-row');
-            if (row) row.classList.add('dragging');
-        }
-
-        function handleDragEnd(e) {
-            const row = e.target.closest('.drag-row');
-            if (row) row.classList.remove('dragging');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            const container = e.currentTarget;
-            const afterElement = getDragAfterElement(container, e.clientY);
-            const dragging = document.querySelector('.dragging');
-            if (dragging) {
-                if (afterElement == null) {
-                    container.appendChild(dragging);
-                } else {
-                    container.insertBefore(dragging, afterElement);
-                }
-            }
+            container.addEventListener('dragstart', e => e.target.closest('.drag-row')?.classList.add('dragging'));
+            container.addEventListener('dragend', e => e.target.closest('.drag-row')?.classList.remove('dragging'));
+            container.addEventListener('dragover', e => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(container, e.clientY);
+                const dragging = document.querySelector('.dragging');
+                if (dragging) { if (afterElement == null) container.appendChild(dragging); else container.insertBefore(dragging, afterElement); }
+            });
         }
 
         function getDragAfterElement(container, y) {
@@ -619,42 +689,35 @@
             return draggableElements.reduce((closest, child) => {
                 const box = child.getBoundingClientRect();
                 const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
+                if (offset < 0 && offset > closest.offset) return { offset: offset, element: child }; else return closest;
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
         window.addScheduleSlotInput = () => {
             const container = document.getElementById('admin-schedule-inputs');
-            const row = createAdminSlotRow('', Date.now());
-            container.appendChild(row);
+            container.appendChild(createAdminSlotRow('', Date.now()));
             container.scrollTop = container.scrollHeight;
         };
 
         window.saveAdminSettings = async () => {
             const adminInputs = document.getElementById('admin-schedule-inputs');
             const newSlots = Array.from(adminInputs.querySelectorAll('.slot-val-input')).map(i => i.value).filter(v => v.trim());
-            
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config'), {
                     slots: newSlots,
                     note: document.getElementById('admin-schedule-note').value,
                     registerPassword: document.getElementById('admin-register-password').value
                 });
-                window.showModal('已更新', '班表與系統公告設定已成功同步至雲端伺服器，前台排序已更新。');
+                window.showModal('已更新', '系統設定已成功同步至雲端伺服器。');
             } catch(e) { window.showModal('儲存失敗', '請檢查網路連線。'); }
         };
 
-        // --- 表格渲染與自動隱藏邏輯 ---
         function mask(str) { 
             if (!str) return ""; 
-            if (str.length <= 1) return str;
-            return str.charAt(0) + "Ｏ" + (str.length > 2 ? str.substring(2) : ""); 
+            return str.length <= 1 ? str : str.charAt(0) + "Ｏ" + (str.length > 2 ? str.substring(2) : ""); 
         }
 
+        // --- 表格渲染 ---
         window.renderVisitorTable = () => {
             const tbody = document.getElementById('visitor-tbody');
             const empty = document.getElementById('visitor-empty');
@@ -662,10 +725,10 @@
             
             const today = new Date().toLocaleDateString('en-CA'); 
             
-            // 過濾：只顯示「候補中(waiting)」且「未過期」的資料
-            const activeWaitlist = waitlistData.filter(item => {
+            // 過濾：只顯示「已填寫(waiting)」且「未過期」的資料
+            const activeWaitlist = window.waitlistData.filter(item => {
                 const isWaiting = item.status === 'waiting';
-                const isNotExpired = !(item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today);
+                const isNotExpired = !(item.futureApptDate && item.futureApptDate < today);
                 return isWaiting && isNotExpired;
             });
 
@@ -676,14 +739,12 @@
                 activeWaitlist.forEach((item, idx) => {
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-orange-50 transition-colors";
-                    const phoneMasked = item.phone.slice(0, 2) + "****" + item.phone.slice(-3);
+                    const phoneMasked = (item.phone || "0000000000").slice(0, 2) + "****" + (item.phone || "000").slice(-3);
                     
-                    let futureApptDisplay = '<span class="text-stone-300 text-xs">-</span>';
-                    if (item.hasFutureAppt === 'yes' && item.futureApptDate) {
+                    let futureApptDisplay = '-';
+                    if (item.futureApptDate) {
                         futureApptDisplay = `<div class="text-xs text-stone-600 font-bold">${item.futureApptDate}</div>`;
-                        if (item.futureApptDoctor) {
-                            futureApptDisplay += `<div class="text-[10px] text-stone-400">${item.futureApptDoctor}</div>`;
-                        }
+                        if (item.futureApptTime) futureApptDisplay += `<div class="text-[10px] text-stone-500">${item.futureApptTime}</div>`;
                     }
 
                     tr.innerHTML = `
@@ -698,7 +759,7 @@
                         <td class="p-4 border-b text-center">
                             <div class="flex flex-col gap-1">
                                 <button onclick="window.promptSelfUpdate('${item.id}')" class="text-[10px] text-teal-600 hover:underline font-bold transition-colors">更新時段</button>
-                                <button onclick="window.promptSelfCancel('${item.id}')" class="text-[10px] text-stone-400 hover:text-red-500 underline font-bold transition-colors">取消候補</button>
+                                <button onclick="window.promptSelfCancel('${item.id}')" class="text-[10px] text-stone-400 hover:text-red-500 underline font-bold transition-colors mt-1">取消候補</button>
                             </div>
                         </td>
                     `;
@@ -713,42 +774,48 @@
             tbody.innerHTML = '';
             const today = new Date().toLocaleDateString('en-CA');
             
-            // 後台保留「所有」歷史紀錄，並標註狀態
-            waitlistData.forEach(item => {
+            window.waitlistData.forEach(item => {
                 const tr = document.createElement('tr');
+                const isInit = item.status === 'init';
                 const isDone = item.status === 'done';
                 const isCanceled = item.status === 'canceled'; 
-                const isExpired = item.hasFutureAppt === 'yes' && item.futureApptDate && item.futureApptDate < today && !isDone && !isCanceled;
+                const isExpired = item.futureApptDate && item.futureApptDate < today && !isDone && !isCanceled;
                 
                 tr.className = (isDone || isExpired || isCanceled) ? "opacity-40 grayscale bg-stone-50" : "hover:bg-stone-50 transition-colors";
                 
                 // 動態設定狀態標籤
                 let badgeClass = 'bg-orange-100 text-orange-700';
                 let badgeText = '候補中';
-                if (isDone) { badgeClass = 'bg-teal-100 text-teal-700'; badgeText = '已完成'; }
+                if (isInit) { badgeClass = 'bg-purple-100 text-purple-700'; badgeText = '待家屬填寫'; }
+                else if (isDone) { badgeClass = 'bg-teal-100 text-teal-700'; badgeText = '已完成'; }
                 else if (isCanceled) { badgeClass = 'bg-red-100 text-red-700'; badgeText = '已自行取消'; }
                 else if (isExpired) { badgeClass = 'bg-stone-200 text-stone-600'; badgeText = '已過期'; }
 
-                // 動態設定操作按鈕（若是完成或取消，則改為還原按鈕）
-                let actionBtn = `<button onclick="window.toggleStatus('${item.id}', 'done')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">完成</button>`;
-                if (isDone || isCanceled) {
-                    actionBtn = `<button onclick="window.toggleStatus('${item.id}', 'waiting')" class="text-xs bg-stone-500 hover:bg-stone-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">還原</button>`;
+                // 動態設定操作按鈕
+                let actionBtn = '';
+                if (!isInit) {
+                    if (isDone || isCanceled) {
+                        actionBtn = `<button onclick="window.toggleStatus('${item.id}', 'waiting')" class="text-xs bg-stone-500 hover:bg-stone-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">還原</button>`;
+                    } else {
+                        actionBtn = `<button onclick="window.toggleStatus('${item.id}', 'done')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow-sm font-bold transition-colors">完成</button>`;
+                    }
                 }
+
+                const ownerDisplay = isInit ? `<span class="text-stone-400 italic">未填寫</span>` : `<strong>${item.ownerName}</strong>`;
+                const petDisplay = isInit ? `<span class="text-stone-400 italic">未填寫</span>` : `<strong>${item.petName}</strong> (${item.species})<br>${item.breed}`;
+                const callTimeBadge = item.preferredCallTime ? `<br><span class="text-[10px] text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200 mt-1 inline-block">📞 ${item.preferredCallTime}</span>` : '';
 
                 tr.innerHTML = `
                     <td class="p-4 border-b text-xs text-stone-500">${item.timestamp}</td>
-                    <td class="p-4 border-b"><strong>${item.ownerName}</strong><br><span class="text-xs text-stone-500 font-mono">${item.phone}</span></td>
-                    <td class="p-4 border-b text-xs font-medium"><strong>${item.petName}</strong> (${item.species})<br>${item.breed}</td>
+                    <td class="p-4 border-b">${ownerDisplay}<br><span class="text-xs text-stone-500 font-mono">${item.phone}</span>${callTimeBadge}</td>
+                    <td class="p-4 border-b text-xs font-medium">${petDisplay}</td>
                     <td class="p-4 border-b text-xs font-medium">
                         <span class="text-orange-600 font-bold">${(item.selectedSchedule || []).join(', ')}</span>
-                        <br><span class="text-teal-700 bg-teal-50 px-1 rounded mt-1 inline-block border border-teal-100">通知緩衝：至少 ${item.travelTime || '?'} 小時</span>
-                        ${item.hasFutureAppt === 'yes' ? `<br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">原預約：${item.futureApptDate} (${item.futureApptDoctor})</div>` : ''}
+                        <br><span class="text-teal-700 bg-teal-50 px-1 rounded mt-1 inline-block border border-teal-100">緩衝：至少 ${item.travelTime || '?'} 小時</span>
+                        <br><div class="mt-1 text-blue-600 font-bold border-l-2 border-blue-200 pl-2">原預約：${item.futureApptDate} ${item.futureApptTime} (${item.futureApptDoctor})</div>
                     </td>
                     <td class="p-4 border-b text-center">
-                        <span class="px-2 py-1 rounded-full text-xs font-bold ${badgeClass}">
-                            ${badgeText}
-                        </span>
-                        <div class="text-[10px] mt-1 text-stone-400 font-mono">PWD: ${item.cancelPassword}</div>
+                        <span class="px-2 py-1 rounded-full text-xs font-bold ${badgeClass}">${badgeText}</span>
                     </td>
                     <td class="p-4 border-b text-center whitespace-nowrap">
                         ${actionBtn}
@@ -760,28 +827,150 @@
         };
 
         window.toggleStatus = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status }); };
-        window.adminDelete = async (id) => { if (confirm('確定要從雲端永久刪除此筆候補資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
+        window.adminDelete = async (id) => { if (confirm('確定要從雲端永久刪除此筆資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
 
-        // --- 復原：更新時段邏輯 ---
-        window.promptSelfUpdate = (id) => {
-            const item = waitlistData.find(i => i.id === id);
-            window.showModal('身分驗證', `毛孩【${mask(item.petName)}】您好，更新候補時段請輸入當初登記的「自訂密碼」：`, (pwd) => {
-                if (pwd === item.cancelPassword) {
+        // --- 櫃檯建立初始檔案 ---
+        window.handleStaffInitSubmit = async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('init-phone').value.trim();
+            const date = document.getElementById('init-date').value;
+            const time = document.getElementById('init-time').value;
+            const doctor = document.getElementById('init-doctor').value;
+
+            // 檢查是否已有相同的手機與日期檔案
+            const existing = window.waitlistData.find(i => i.phone === phone && i.futureApptDate === date && i.status !== 'canceled');
+            if (existing) {
+                window.showModal('檔案已存在', '該手機號碼與預約日期已有一筆有效紀錄，請勿重複建立。');
+                return;
+            }
+
+            const data = {
+                createdAt: Date.now(),
+                timestamp: new Date().toLocaleString('zh-TW', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                phone: phone,
+                futureApptDate: date,
+                futureApptTime: time,
+                futureApptDoctor: doctor,
+                status: 'init' 
+            };
+            
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'waitlist'), data);
+                window.showModal('建檔成功', '已為該家長建立候補初始檔案。\n\n請告知家長於首頁點選「登記候補」，並輸入手機與此預約日期來填寫詳細的毛孩資訊。', () => { 
                     window.hideModal(); 
+                    window.switchMode('visitor'); 
+                });
+                e.target.reset();
+            } catch(err) {
+                window.showModal('錯誤', '資料建立失敗，請檢查網路連線。');
+            }
+        };
+
+        // --- 載入資料至表單 ---
+        window.loadRecordToForm = (record) => {
+            window.currentParentRecord = record;
+            
+            // 唯讀區塊
+            document.getElementById('phone').value = record.phone;
+            document.getElementById('display-appt-date').textContent = record.futureApptDate;
+            document.getElementById('display-appt-time').textContent = record.futureApptTime;
+            document.getElementById('display-appt-doc').textContent = record.futureApptDoctor;
+
+            // 填寫過的話自動帶入
+            if (record.ownerName) document.getElementById('ownerName').value = record.ownerName;
+            if (record.ownerTitle) document.getElementById('ownerTitle').value = record.ownerTitle;
+            if (record.preferredCallTime) document.getElementById('preferredCallTime').value = record.preferredCallTime;
+            if (record.petName) document.getElementById('petName').value = record.petName;
+            if (record.species) {
+                document.getElementById('species').value = record.species;
+                // 觸發品種連動
+                document.getElementById('species').dispatchEvent(new Event('change'));
+                setTimeout(() => { if (record.breed) document.getElementById('breed').value = record.breed; }, 50);
+            }
+            
+            // 年齡拆解回填
+            if (record.age) {
+                if (record.age.includes('個月')) {
+                    document.getElementById('age').value = record.age.replace('個月','');
+                    document.getElementById('ageUnit').value = '個月';
+                } else {
+                    document.getElementById('age').value = record.age.replace('歲','');
+                    document.getElementById('ageUnit').value = '歲';
+                }
+            } else { document.getElementById('age').value = ''; }
+
+            if (record.sex) document.getElementById('sex').value = record.sex;
+            if (record.neutered) document.getElementById('neutered').value = record.neutered;
+            if (record.weight) document.getElementById('weight').value = record.weight;
+            
+            if (record.travelTime) document.getElementById('travelTime').value = record.travelTime;
+
+            Array.from(document.querySelectorAll('input[name="scheduleSlot"]')).forEach(el => {
+                el.checked = (record.selectedSchedule || []).includes(el.value);
+            });
+            Array.from(document.querySelectorAll('input[name="visitReason"]')).forEach(el => {
+                el.checked = (record.reasons || []).includes(el.value);
+            });
+            window.checkReasonWarnings();
+        };
+
+        // --- 家長提交完整表單 (更新資料) ---
+        window.handleRegisterSubmit = async (e) => {
+            e.preventDefault();
+            if (!window.currentParentRecord) return;
+
+            const selectedSchedule = Array.from(document.querySelectorAll('input[name="scheduleSlot"]:checked')).map(el => el.value);
+            if (selectedSchedule.length === 0) { window.showModal('提醒', '請至少勾選一個可候補時段。'); return; }
+            
+            const data = {
+                ownerName: document.getElementById('ownerName').value,
+                ownerTitle: document.getElementById('ownerTitle').value,
+                preferredCallTime: document.getElementById('preferredCallTime').value,
+                petName: document.getElementById('petName').value,
+                species: document.getElementById('species').value,
+                breed: document.getElementById('breed').value,
+                age: document.getElementById('age').value + document.getElementById('ageUnit').value,
+                sex: document.getElementById('sex').value,
+                neutered: document.getElementById('neutered').value,
+                weight: document.getElementById('weight').value,
+                selectedSchedule,
+                travelTime: document.getElementById('travelTime').value,
+                reasons: Array.from(document.querySelectorAll('input[name="visitReason"]:checked')).map(el => el.value),
+                status: 'waiting' // 從 init 變為 waiting
+            };
+            
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', window.currentParentRecord.id), data);
+                window.showModal('登記完成', '您的詳細候補資料已同步至醫院雲端。若有空檔釋出，櫃檯將優先以此名單連繫，請保持電話暢通。', () => { 
+                    window.hideModal(); 
+                    window.switchMode('visitor'); 
+                });
+                e.target.reset();
+                window.currentParentRecord = null;
+            } catch(err) {
+                window.showModal('錯誤', '資料送出失敗，請檢查網路連線。');
+            }
+        };
+
+        // --- 雙重驗證更新時段邏輯 ---
+        window.promptSelfUpdate = (id) => {
+            const item = window.waitlistData.find(i => i.id === id);
+            window.showAuthModal('變更時段驗證', `毛孩【${mask(item.petName)}】您好，請輸入您當初預約時留下的【手機號碼】與【門診日期】進行驗證：`, (phone, date) => {
+                window.hideAuthModal();
+                if (phone === item.phone && date === item.futureApptDate) {
                     setTimeout(() => window.openUpdateModal(item), 350);
                 } else {
-                    window.showModal('驗證失敗', '密碼不正確，請再試一次或聯繫醫院櫃檯協助。');
+                    setTimeout(() => window.showModal('驗證失敗', '手機號碼或日期不正確，請重新確認。'), 350);
                 }
-            }, true);
+            });
         };
 
         window.openUpdateModal = (item) => {
             const container = document.getElementById('update-slots-container');
-            const infoText = document.getElementById('update-modal-info');
-            infoText.textContent = `毛孩：${item.petName} | 家屬：${item.ownerName}`;
+            document.getElementById('update-modal-info').textContent = `毛孩：${item.petName} | 家屬：${item.ownerName}`;
             container.innerHTML = '';
             
-            scheduleSettings.slots.forEach(slot => {
+            window.scheduleSettings.slots.forEach(slot => {
                 const isChecked = (item.selectedSchedule || []).includes(slot) ? 'checked' : '';
                 const div = document.createElement('div');
                 div.innerHTML = `<label class="flex items-center gap-4 p-5 border border-stone-100 rounded-2xl hover:bg-orange-50 cursor-pointer bg-white transition-all shadow-sm focus-within:ring-2 focus-within:ring-orange-200"><input type="checkbox" name="updateSlot" value="${slot}" ${isChecked} class="w-6 h-6 text-orange-500 rounded border-stone-300 focus:ring-orange-500"> <span class="text-xl font-bold text-stone-700 leading-tight">${slot}</span></label>`;
@@ -805,7 +994,7 @@
 
             const modal = document.getElementById('update-modal');
             modal.classList.remove('hidden');
-            void modal.offsetWidth; // Force reflow
+            void modal.offsetWidth; 
             modal.classList.remove('opacity-0');
             modal.children[0].classList.remove('scale-95');
         }
@@ -817,62 +1006,27 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
-        window.handleRegisterSubmit = async (e) => {
-            e.preventDefault();
-            const selectedSchedule = Array.from(document.querySelectorAll('input[name="scheduleSlot"]:checked')).map(el => el.value);
-            if (selectedSchedule.length === 0) { window.showModal('提醒', '請至少勾選一個可候補時段。'); return; }
-            
-            const hasFutureAppt = document.querySelector('input[name="hasFutureAppt"]:checked').value;
-            
-            const data = {
-                createdAt: Date.now(),
-                timestamp: new Date().toLocaleString('zh-TW', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-                ownerName: document.getElementById('ownerName').value,
-                ownerTitle: document.getElementById('ownerTitle').value,
-                phone: document.getElementById('phone').value,
-                petName: document.getElementById('petName').value,
-                species: document.getElementById('species').value,
-                breed: document.getElementById('breed').value,
-                age: document.getElementById('age').value + document.getElementById('ageUnit').value,
-                sex: document.getElementById('sex').value,
-                neutered: document.getElementById('neutered').value,
-                weight: document.getElementById('weight').value,
-                selectedSchedule,
-                travelTime: document.getElementById('travelTime').value,
-                reasons: Array.from(document.querySelectorAll('input[name="visitReason"]:checked')).map(el => el.value),
-                hasFutureAppt: hasFutureAppt,
-                futureApptDate: hasFutureAppt === 'yes' ? document.getElementById('futureApptDate').value : null,
-                futureApptDoctor: hasFutureAppt === 'yes' ? document.getElementById('futureApptDoctor').value : null,
-                cancelPassword: document.getElementById('cancelPassword').value,
-                status: 'waiting'
-            };
-            
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'waitlist'), data);
-                window.showModal('登記完成', '您的候補申請已同步至醫院雲端。若有空檔釋出，櫃檯將優先以此名單連繫，請保持電話暢通。', () => { window.hideModal(); window.switchMode('visitor'); });
-                e.target.reset();
-            } catch(err) {
-                window.showModal('錯誤', '資料送出失敗，請檢查網路連線。');
-            }
-        };
-
+        // --- 雙重驗證取消邏輯 ---
         window.promptSelfCancel = (id) => {
-            const item = waitlistData.find(i => i.id === id);
-            const msg = `確定要取消毛孩【${mask(item.petName)}】的候補登記嗎？\n\n⚠️ 溫馨提醒：此操作僅限於取消候補名單，若您要取消原本已預約的門診時段，仍需於營業時間致電櫃檯 04-2326-0250 取消。\n\n請輸入自訂密碼：`;
+            const item = window.waitlistData.find(i => i.id === id);
+            const msg = `確定要取消毛孩【${mask(item.petName)}】的候補登記嗎？\n\n⚠️ 溫馨提醒：此操作僅限於取消候補名單，若您要取消原本已預約的門診時段，仍需於營業時間致電櫃檯 04-2326-0250 取消。\n\n請輸入預約時的手機與日期驗證：`;
             
-            window.showModal('取消候補', msg, async (pwd) => {
-                if (pwd === item.cancelPassword) { 
+            window.showAuthModal('取消候補', msg, async (phone, date) => {
+                window.hideAuthModal();
+                if (phone === item.phone && date === item.futureApptDate) { 
                     try {
                         await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status: 'canceled' }); 
-                        window.showModal('取消成功', '已從候補系統中移除您的資料，感謝您的配合！\n\n(若有預約原門診，請記得致電 04-2326-0250 取消喔)'); 
+                        setTimeout(() => {
+                            window.showModal('取消成功', '已從候補系統中移除您的資料，感謝您的配合！\n\n(若有預約原門診，請記得致電 04-2326-0250 取消喔)'); 
+                        }, 350);
                     } catch(err) {
-                        window.showModal('錯誤', '取消失敗，請檢查網路連線。');
+                        setTimeout(() => window.showModal('錯誤', '取消失敗，請檢查網路連線。'), 350);
                     }
                 }
                 else {
-                    window.showModal('驗證失敗', '密碼不正確，請重試或聯繫櫃檯協助。');
+                    setTimeout(() => window.showModal('驗證失敗', '手機或日期不正確，請重試或聯繫櫃檯協助。'), 350);
                 }
-            }, true);
+            });
         };
 
         // --- 核心導覽與 UI 輔助 ---
@@ -880,6 +1034,7 @@
             document.getElementById('sec-visitor').classList.toggle('hidden-section', mode !== 'visitor');
             document.getElementById('sec-register').classList.toggle('hidden-section', mode !== 'register');
             document.getElementById('sec-admin').classList.toggle('hidden-section', mode !== 'admin');
+            document.getElementById('sec-staff-init').classList.toggle('hidden-section', mode !== 'staff-init');
             
             document.getElementById('btn-visitor').className = mode === 'visitor' ? 'px-5 py-2.5 rounded-full font-bold bg-orange-500 text-white shadow-md transition-all' : 'px-5 py-2.5 rounded-full font-bold text-stone-500 hover:bg-stone-100 transition-all';
             document.getElementById('btn-register').className = mode === 'register' ? 'px-5 py-2.5 rounded-full font-bold bg-orange-500 text-white shadow-md transition-all' : 'px-5 py-2.5 rounded-full font-bold text-stone-500 hover:bg-stone-100 transition-all';
@@ -888,40 +1043,53 @@
 
         window.promptLogin = (target) => {
             if (target === 'register') {
-                window.showModal('登記權限驗證', '請輸入櫃檯提供的「登記密碼」以解鎖表單：', 
-                    (pwd) => { 
-                        if (pwd === (scheduleSettings.registerPassword || '3050')) {
-                            window.hideModal();
-                            window.switchMode('register');
+                window.showAuthModal('家屬身分驗證', '請輸入您致電預約時留下的手機號碼，以及預約好的門診日期，以利系統尋找您的專屬候補檔案。', 
+                    (phone, date) => { 
+                        const record = window.waitlistData.find(i => i.phone === phone && i.futureApptDate === date && i.status !== 'canceled');
+                        if (record) {
+                            window.hideAuthModal();
+                            window.loadRecordToForm(record);
+                            setTimeout(() => window.switchMode('register'), 300);
                         } else {
-                            window.showModal('錯誤', '登記密碼不正確。');
+                            window.hideAuthModal();
+                            setTimeout(() => window.showModal('找不到紀錄', '找不到符合的預約紀錄。\n請確認輸入是否有誤，或確保您已致電櫃檯 (04-2326-0250) 建立初始候補檔案。'), 350);
                         }
-                    }, 
-                    true,
-                    () => { window.switchMode('visitor'); } // 點擊取消導回首頁
+                    }
                 );
             } else if (target === 'admin') {
                 window.showModal('管理端登入', '請輸入管理員密碼：', 
                     (pwd) => { 
+                        window.hideModal();
                         if (pwd === 'gaze250305') {
-                            window.hideModal();
-                            window.switchMode('admin'); 
+                            setTimeout(() => window.switchMode('admin'), 300); 
                         } else {
-                            window.showModal('錯誤', '管理密碼不正確。'); 
+                            setTimeout(() => window.showModal('錯誤', '管理密碼不正確。'), 350); 
                         }
                     }, 
                     true,
-                    () => { window.switchMode('visitor'); } // 點擊取消導回首頁
+                    () => { window.switchMode('visitor'); } 
+                );
+            } else if (target === 'staff') {
+                window.showModal('櫃檯建檔解鎖', '請輸入櫃檯專用密碼：', 
+                    (pwd) => { 
+                        window.hideModal();
+                        if (pwd === (window.scheduleSettings.registerPassword || '3050')) {
+                            setTimeout(() => window.switchMode('staff-init'), 300); 
+                        } else {
+                            setTimeout(() => window.showModal('錯誤', '密碼不正確。'), 350); 
+                        }
+                    }, 
+                    true
                 );
             }
         };
 
-        window.modalHideTimeoutId = null;
+        window._gazeModalTimeoutId = null;
 
         window.showModal = (title, message, onConfirm, requireInput, onCancel = null) => {
-            if (window.modalHideTimeoutId) {
-                clearTimeout(window.modalHideTimeoutId);
-                window.modalHideTimeoutId = null;
+            if (window._gazeModalTimeoutId) {
+                clearTimeout(window._gazeModalTimeoutId);
+                window._gazeModalTimeoutId = null;
             }
             
             const modal = document.getElementById('custom-modal');
@@ -938,20 +1106,16 @@
                 const val = document.getElementById('modal-input').value; 
                 if (requireInput && !val) return;
                 
+                let shouldHide = true;
                 const originalText = confirmBtn.textContent;
                 
-                // 若未指定執行後顯示其他 Modal，則我們手動關閉
-                let shouldHide = true; 
-
                 if (onConfirm) {
                     confirmBtn.textContent = '處理中...';
                     confirmBtn.disabled = true;
                     try {
                         const result = onConfirm(val);
                         if (result instanceof Promise) await result;
-                        // 若 onConfirm 成功執行且沒有顯示新的 Modal (這很難判斷，所以交由 callback 本身決定或是我們統一先關掉)
-                        // 我們這裡不統一調用 hideModal，讓需要更換畫面的 callback 自己覆蓋，而成功路徑自己呼叫 hideModal。
-                        shouldHide = false; 
+                        shouldHide = false; // 交給 Callback 控制
                     } finally {
                         confirmBtn.textContent = originalText;
                         confirmBtn.disabled = false;
@@ -971,7 +1135,7 @@
 
             // 強制顯示
             modal.classList.remove('hidden');
-            void modal.offsetWidth;
+            void modal.offsetWidth; 
             
             modal.classList.remove('opacity-0');
             contentBox.classList.remove('scale-95');
@@ -985,11 +1149,55 @@
             modal.classList.add('opacity-0'); 
             contentBox.classList.add('scale-95');
             
-            if (window.modalHideTimeoutId) clearTimeout(window.modalHideTimeoutId);
-            window.modalHideTimeoutId = setTimeout(() => {
+            if (window._gazeModalTimeoutId) clearTimeout(window._gazeModalTimeoutId);
+            window._gazeModalTimeoutId = setTimeout(() => {
                 modal.classList.add('hidden');
-                window.modalHideTimeoutId = null;
+                window._gazeModalTimeoutId = null;
             }, 300); // 對齊 CSS transition-duration
+        };
+        
+        // --- 雙重驗證 Modal (Auth Modal) ---
+        window._authModalTimeoutId = null;
+        window.showAuthModal = (title, message, onConfirm) => {
+            if (window._authModalTimeoutId) clearTimeout(window._authModalTimeoutId);
+            
+            const modal = document.getElementById('auth-modal');
+            const contentBox = document.getElementById('auth-modal-content-box');
+            
+            document.getElementById('auth-modal-title').textContent = title;
+            document.getElementById('auth-modal-message').textContent = message;
+            document.getElementById('auth-phone').value = '';
+            document.getElementById('auth-date').value = '';
+            
+            const confirmBtn = document.getElementById('auth-modal-btn-confirm');
+            confirmBtn.onclick = async () => { 
+                const phone = document.getElementById('auth-phone').value.trim(); 
+                const date = document.getElementById('auth-date').value; 
+                if (!phone || !date) { alert('請完整填寫手機與日期'); return; }
+                
+                const originalText = confirmBtn.textContent;
+                confirmBtn.textContent = '處理中...';
+                confirmBtn.disabled = true;
+                try {
+                    await onConfirm(phone, date);
+                } finally {
+                    confirmBtn.textContent = originalText;
+                    confirmBtn.disabled = false;
+                }
+            };
+            
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; 
+            modal.classList.remove('opacity-0');
+            contentBox.classList.remove('scale-95');
+        };
+
+        window.hideAuthModal = () => {
+            const modal = document.getElementById('auth-modal');
+            const contentBox = document.getElementById('auth-modal-content-box');
+            modal.classList.add('opacity-0'); 
+            contentBox.classList.add('scale-95');
+            window._authModalTimeoutId = setTimeout(() => modal.classList.add('hidden'), 300); 
         };
     </script>
 </body>
