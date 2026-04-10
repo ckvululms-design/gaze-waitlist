@@ -759,7 +759,15 @@
                     
                     let futureApptDisplay = '-';
                     if (item.futureApptDate) {
-                        futureApptDisplay = `<div class="text-xs text-stone-600 font-bold">${item.futureApptDate}</div>`;
+                        // 隱藏日期的「日」部分，保留年與月 (例如：2024-04-**)
+                        let maskedDate = item.futureApptDate;
+                        if (maskedDate.includes('-')) {
+                            const parts = maskedDate.split('-');
+                            if (parts.length === 3) {
+                                maskedDate = `${parts[0]}-${parts[1]}-**`;
+                            }
+                        }
+                        futureApptDisplay = `<div class="text-xs text-stone-600 font-bold">${maskedDate}</div>`;
                         if (item.futureApptTime) futureApptDisplay += `<div class="text-[10px] text-stone-500">${item.futureApptTime}</div>`;
                     }
 
