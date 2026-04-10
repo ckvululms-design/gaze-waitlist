@@ -234,7 +234,7 @@
                             </div>
                         </div>
                         
-                        <!-- 方便接電話時間 (已改為文字輸入) -->
+                        <!-- 方便接電話時間 -->
                         <div>
                             <label class="block text-sm font-bold text-stone-700 mb-2">方便接聽電話的時間 <span class="text-orange-500">*</span></label>
                             <input type="text" id="preferredCallTime" required class="w-full p-3 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-100 bg-[#FCFAF8] outline-none font-medium text-stone-800 transition-all" placeholder="例：下午 2 點到 4 點">
@@ -567,7 +567,7 @@
                             "週五下午 - 詹益萍", "週五下午 - 楊崇君",
                             "週日上午 - 楊崇君", "週日下午 - 楊崇君"
                         ], 
-                        note: "1. 醫師休診公告\n\n【門診異動通知】楊崇君醫師將於 4/11 至 5/10 期間暫停門診服務。若有相關看診需求，建議您提前安排或致電櫃檯洽詢，造成不便敬請見諒。\n\n2. 登記與取消提醒\n\n【溫馨提醒：候補資源共享】登記完成後，請務必熟記您所設定的「自訂取消密碼」。若等候期間您的寶貝已於他院完成診療，請利用該密碼回到本網頁手動取消候補，或直接致電櫃檯由人員協助處理。\n\n3. 候補失效與電話通知說明\n\n【候補系統運作須知】本系統協助您嘗試「提前」看診。若直到您的「原預約時段」前皆無名額釋出，櫃檯將不主動致電詢問；一旦時間超過您的原預約日期，該筆候補登記將自動失效。", 
+                        note: "1. 醫師休診公告\n\n【門診異動通知】楊崇君醫師將於 4/11 至 5/10 期間暫停門診服務。若有相關看診需求，建議您提前安排或致電櫃檯洽詢，造成不便敬請見諒。\n\n2. 登記與取消提醒\n\n【溫馨提醒：候補資源共享】登記完成後，請務必熟記您所設定的「自訂取消密碼」。若等候期間您的寶貝已於他院完成診療，請利用該密碼回到本網頁手動取消候補，或直接致電櫃檯由人員協助處理。\n\n3. 候補失效與電話通知說明\n\n【候補系統運作須知】本系統協助您嘗試「提前」看診。若直到您的「原預約時段」前皆無名額釋出，櫃檯將不主提致電詢問；一旦時間超過您的原預約日期，該筆候補登記將自動失效。", 
                         registerPassword: "3050" 
                     };
                     setDoc(settingsRef, window.scheduleSettings);
@@ -713,18 +713,38 @@
             return str.length <= 1 ? str : str.charAt(0) + "Ｏ" + (str.length > 2 ? str.substring(2) : ""); 
         }
 
+        // --- 新增：判斷紀錄是否過期 (精確到時分 + 緩衝時間) ---
+        function isRecordExpired(item) {
+            // 如果沒有日期或時間資料，就不當作過期
+            if (!item.futureApptDate || !item.futureApptTime) return false;
+            
+            // 將日期與時間組合成系統可解析的格式 (YYYY-MM-DDTHH:mm:00)
+            const apptDateTimeStr = `${item.futureApptDate}T${item.futureApptTime}:00`;
+            const apptDate = new Date(apptDateTimeStr);
+            
+            if (isNaN(apptDate.getTime())) return false;
+
+            // 取得家長設定的緩衝時間 (小時)，若尚未填寫 (如剛建檔) 則預設為 0 小時
+            const bufferHours = parseFloat(item.travelTime) || 0;
+            
+            // 計算真正的失效時間：原預約時間 減去 緩衝小時數
+            const expirationTime = new Date(apptDate.getTime() - bufferHours * 60 * 60 * 1000);
+            
+            // 比較當下時間與失效時間
+            const now = new Date();
+            return now >= expirationTime;
+        }
+
         // --- 表格渲染 ---
         window.renderVisitorTable = () => {
             const tbody = document.getElementById('visitor-tbody');
             const empty = document.getElementById('visitor-empty');
             tbody.innerHTML = '';
             
-            const today = new Date().toLocaleDateString('en-CA'); 
-            
             // 過濾：只顯示「已填寫(waiting)」且「未過期」的資料
             const activeWaitlist = window.waitlistData.filter(item => {
                 const isWaiting = item.status === 'waiting';
-                const isNotExpired = !(item.futureApptDate && item.futureApptDate < today);
+                const isNotExpired = !isRecordExpired(item); // 使用新的精確時間判斷
                 return isWaiting && isNotExpired;
             });
 
@@ -768,14 +788,15 @@
             const tbody = document.getElementById('admin-tbody');
             if (!tbody) return;
             tbody.innerHTML = '';
-            const today = new Date().toLocaleDateString('en-CA');
             
+            // 後台保留「所有」歷史紀錄，並標註狀態
             window.waitlistData.forEach(item => {
                 const tr = document.createElement('tr');
                 const isInit = item.status === 'init';
                 const isDone = item.status === 'done';
                 const isCanceled = item.status === 'canceled'; 
-                const isExpired = item.futureApptDate && item.futureApptDate < today && !isDone && !isCanceled;
+                // 使用新的精確時間判斷取代原有的僅看日期
+                const isExpired = isRecordExpired(item) && !isDone && !isCanceled;
                 
                 tr.className = (isDone || isExpired || isCanceled) ? "opacity-40 grayscale bg-stone-50" : "hover:bg-stone-50 transition-colors";
                 
@@ -823,7 +844,18 @@
         };
 
         window.toggleStatus = async (id, status) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id), { status }); };
-        window.adminDelete = async (id) => { if (confirm('確定要從雲端永久刪除此筆資料嗎？')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id)); };
+        
+        window.adminDelete = (id) => { 
+            window.showModal('確認刪除', '確定要從雲端永久刪除此筆資料嗎？\n此操作無法復原。', async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'waitlist', id));
+                    window.hideModal(); // 新增：刪除成功後關閉對話框
+                } catch(e) {
+                    window.hideModal(); // 新增：發生錯誤時先關閉舊對話框
+                    setTimeout(() => window.showModal('錯誤', '刪除失敗，請檢查網路連線。'), 350);
+                }
+            }, false); 
+        };
 
         // --- 櫃檯建立初始檔案 ---
         window.handleStaffInitSubmit = async (e) => {
@@ -976,7 +1008,8 @@
             document.getElementById('update-modal-btn-save').onclick = async () => {
                 const selected = Array.from(document.querySelectorAll('input[name="updateSlot"]:checked')).map(el => el.value);
                 if (selected.length === 0) {
-                    alert('請至少勾選一個候補時段，或直接關閉視窗選擇取消候補。');
+                    window.hideUpdateModal();
+                    setTimeout(() => window.showModal('提醒', '請至少勾選一個候補時段，或直接關閉視窗選擇取消候補。'), 300);
                     return;
                 }
                 try {
@@ -984,7 +1017,8 @@
                     window.hideUpdateModal();
                     setTimeout(() => window.showModal('更新成功', '您的候補時段已重新同步至醫院。'), 350);
                 } catch(e) {
-                    alert('更新失敗，請檢查網路連線。');
+                    window.hideUpdateModal();
+                    setTimeout(() => window.showModal('錯誤', '更新失敗，請檢查網路連線。'), 350);
                 }
             };
 
@@ -1169,7 +1203,11 @@
             confirmBtn.onclick = async () => { 
                 const phone = document.getElementById('auth-phone').value.trim(); 
                 const date = document.getElementById('auth-date').value; 
-                if (!phone || !date) { alert('請完整填寫手機與日期'); return; }
+                if (!phone || !date) { 
+                    window.hideAuthModal();
+                    setTimeout(() => window.showModal('提醒', '請完整填寫手機與日期'), 300);
+                    return; 
+                }
                 
                 const originalText = confirmBtn.textContent;
                 confirmBtn.textContent = '處理中...';
